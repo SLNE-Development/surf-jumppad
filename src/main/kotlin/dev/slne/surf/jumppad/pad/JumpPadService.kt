@@ -20,7 +20,7 @@ class JumpPadManager {
     }
 
     fun deletePad(pad: JumpPad) {
-        pads.remove(pad)
+        pads.removeIf { it.uuid == pad.uuid }
     }
 
     fun updatePad(pad: JumpPad) {

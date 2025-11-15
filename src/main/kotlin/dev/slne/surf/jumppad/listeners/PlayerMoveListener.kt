@@ -4,6 +4,7 @@ import dev.slne.surf.jumppad.pad.JumpPadType
 import dev.slne.surf.jumppad.pad.jumpPadService
 import dev.slne.surf.jumppad.particles.animationService
 import dev.slne.surf.jumppad.sounds.soundService
+import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerMoveEvent
@@ -27,7 +28,7 @@ object PlayerMoveListener : Listener {
         val lastUse = cooldowns[player.uniqueId] ?: 0L
         if (now - lastUse < cooldownMillis) return
 
-        val boost = calculateBoost(player.eyeLocation.direction, pad.type, pad.strength)
+        val boost = calculateBoost(player, pad.type, pad.strength)
         player.velocity = boost
 
         when (pad.type) {
@@ -46,12 +47,20 @@ object PlayerMoveListener : Listener {
     }
 
 
-    private fun calculateBoost(direction: Vector, type: JumpPadType, strength: Double): Vector =
+    private fun calculateBoost(player: Player, type: JumpPadType, strength: Double): Vector =
         when (type) {
             JumpPadType.VERTICAL -> Vector(0.0, strength, 0.0)
-            JumpPadType.HORIZONTAL -> direction.clone().apply {
-                y = 0.1
-                normalize().multiply(strength)
+
+            JumpPadType.HORIZONTAL -> {
+                val moveDir = player.velocity.clone()
+                if (moveDir.lengthSquared() < 0.01) {
+                    player.location.direction.clone()
+                } else {
+                    moveDir
+                }.apply {
+                    y = 0.1
+                    normalize().multiply(strength)
+                }
             }
         }
 }

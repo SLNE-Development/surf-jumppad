@@ -4,6 +4,7 @@ import dev.slne.surf.jumppad.pad.JumpPadType
 import dev.slne.surf.jumppad.pad.jumpPadService
 import dev.slne.surf.jumppad.particles.animationService
 import dev.slne.surf.jumppad.sounds.soundService
+import org.bukkit.GameMode
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -20,8 +21,10 @@ object PlayerMoveListener : Listener {
     @EventHandler
     fun onPlayerMove(event: PlayerMoveEvent) {
         if (!event.hasExplicitlyChangedBlock()) return
-
         val player = event.player
+
+        if (player.gameMode == GameMode.SPECTATOR) return
+
         val pad = jumpPadService.getPadAt(event.to) ?: return
 
         val now = System.currentTimeMillis()

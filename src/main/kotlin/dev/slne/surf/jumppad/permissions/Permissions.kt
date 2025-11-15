@@ -7,5 +7,4 @@ object Permissions : PermissionRegistry() {
     const val COMMAND_PREFIX = "$PREFIX.command"
 
     val COMMAND_JUMP_PAD_GENERIC = create("$COMMAND_PREFIX.jump-pad")
-    val COMMAND_JUMP_PAD_CREATE = create("$COMMAND_PREFIX.create")
 }

@@ -7,6 +7,7 @@ data class JumpPad(
     val uuid : UUID,
     val origin: Location,
     val strength: Double,
-    val size: Int,
+    val width: Int,
+    val length: Int,
     val type: JumpPadType
 )

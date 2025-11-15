@@ -2,7 +2,8 @@ package dev.slne.surf.jumppad.listeners
 
 import dev.slne.surf.jumppad.pad.JumpPadType
 import dev.slne.surf.jumppad.pad.jumpPadService
-import org.bukkit.Particle
+import dev.slne.surf.jumppad.particles.animationService
+import dev.slne.surf.jumppad.sounds.soundService
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerMoveEvent
@@ -12,40 +13,45 @@ import kotlin.time.Duration.Companion.seconds
 
 object PlayerMoveListener : Listener {
 
-    private val cooldowns = mutableMapOf<UUID, Long>()
-    private val COOLDOWN = 3.seconds.inWholeMilliseconds
+    private val cooldowns: MutableMap<UUID, Long> = mutableMapOf()
+    private val cooldownMillis: Long = 3.seconds.inWholeMilliseconds
 
     @EventHandler
     fun onPlayerMove(event: PlayerMoveEvent) {
         if (!event.hasExplicitlyChangedBlock()) return
 
         val player = event.player
-        val to = event.to
-        val pad = jumpPadService.getPadAt(to) ?: return
+        val pad = jumpPadService.getPadAt(event.to) ?: return
 
         val now = System.currentTimeMillis()
         val lastUse = cooldowns[player.uniqueId] ?: 0L
+        if (now - lastUse < cooldownMillis) return
 
-        if (now - lastUse < COOLDOWN) return
+        val boost = calculateBoost(player.eyeLocation.direction, pad.type, pad.strength)
+        player.velocity = boost
 
-        val direction = player.eyeLocation.direction.clone().normalize()
-        val loc = player.location
-        val strength = pad.strength
-
-        val boost: Vector = when (pad.type) {
-
-            JumpPadType.VERTICAL -> Vector(0.0, strength, 0.0)
-
+        when (pad.type) {
             JumpPadType.HORIZONTAL -> {
-                direction.y = 0.1
-                direction.multiply(strength)
+                soundService.playHorizontal(player)
+                animationService.showHorizontal(player)
+            }
+
+            JumpPadType.VERTICAL -> {
+                soundService.playVertical(player)
+                animationService.showVertical(player)
             }
         }
 
-        player.velocity = boost
-
-        loc.world.spawnParticle(Particle.EXPLOSION, loc, 10)
-
         cooldowns[player.uniqueId] = now
     }
+
+
+    private fun calculateBoost(direction: Vector, type: JumpPadType, strength: Double): Vector =
+        when (type) {
+            JumpPadType.VERTICAL -> Vector(0.0, strength, 0.0)
+            JumpPadType.HORIZONTAL -> direction.clone().apply {
+                y = 0.1
+                normalize().multiply(strength)
+            }
+        }
 }

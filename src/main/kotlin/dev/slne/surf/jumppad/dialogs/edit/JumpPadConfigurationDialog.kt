@@ -51,6 +51,7 @@ object JumpPadConfigurationDialog {
                     appendNewline(2)
                     primary("UUID: ")
                     variableValue(pad.uuid.toString())
+                    appendNewline(2)
 
                     info("Im Folgenden siehst du die aktuellen Werte des JumpPads.")
                     appendNewline(2)

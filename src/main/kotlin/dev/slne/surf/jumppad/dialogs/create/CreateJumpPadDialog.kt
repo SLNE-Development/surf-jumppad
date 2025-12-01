@@ -61,7 +61,7 @@ object CreateJumpPadDialog {
             }
             input {
                 text(BOX_KEY) {
-                    label { text("Box") }
+                    label { text("Box (max. 10x10)") }
                     initial("3x3")
                     width(400)
                 }
@@ -113,6 +113,11 @@ object CreateJumpPadDialog {
 
                 val origin = parseLocation(locationString, player.location.world)
                 val (width, length) = parseBox(boxString)
+
+                if (width > 10 || length > 10) {
+                    player.showDialog(JumpPadCreationFailResultDialog.showDialog(player))
+                    return@customClick
+                }
 
                 val strength = strengthFloat.toDouble()
 

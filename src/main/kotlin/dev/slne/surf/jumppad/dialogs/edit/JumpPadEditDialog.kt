@@ -2,6 +2,7 @@
 
 package dev.slne.surf.jumppad.dialogs.edit
 
+import dev.slne.surf.jumppad.dialogs.create.results.JumpPadCreationFailResultDialog
 import dev.slne.surf.jumppad.dialogs.edit.result.JumpPadEditFailResultDialog
 import dev.slne.surf.jumppad.dialogs.view.JumpPadInfoDialog
 import dev.slne.surf.jumppad.pad.JumpPad
@@ -86,7 +87,7 @@ object JumpPadEditDialog {
                 }
                 input {
                     text(BOX_KEY) {
-                        label { text("Box") }
+                        label { text("Box (max. 10x10)") }
                         initial("${pad.width}x${pad.length}")
                         width(400)
                     }
@@ -137,6 +138,12 @@ object JumpPadEditDialog {
                 }
                 val origin = parseLocation(locationString, player.location.world)
                 val (width, length) = parseBox(boxString)
+
+                if (width > 10 || length > 10) {
+                    player.showDialog(JumpPadCreationFailResultDialog.showDialog(player))
+                    return@customClick
+                }
+
                 val strength = strengthFloat.toDouble()
 
                 val type = when (content.getText(TYPE_KEY)) {

@@ -88,7 +88,7 @@ class JumpPadManager {
         visualizePadForAll(pad)
     }
 
-    private fun removePadVisualization(pad: JumpPad) {
+    fun removePadVisualization(pad: JumpPad) {
         val origin = pad.origin
         val world = origin.world
 

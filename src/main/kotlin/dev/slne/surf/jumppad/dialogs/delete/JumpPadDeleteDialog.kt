@@ -85,6 +85,7 @@ object JumpPadDeleteDialog {
         tooltip { info("Klicke hier, um das jumpPad zu löschen.") }
         action {
             playerCallback {
+                jumpPadService.removePadVisualization(pad)
                 jumpPadService.deletePad(pad)
                 it.showDialog(JumpPadListDialog.showDialog())
             }

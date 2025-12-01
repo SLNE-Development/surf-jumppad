@@ -24,6 +24,32 @@ out/
 .apt_generated
 .classpath
 .factorypath
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### IntelliJ IDEA ###
+.idea/modules.xml
+.idea/jarRepositories.xml
+.idea/compiler.xml
+.idea/libraries/
+.idea/workspace.xml
+.idea/misc.xml
+.idea/discord.xml
+.idea/material_theme_project_new.xml
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
 .project
 .settings
 .springBeans
@@ -44,3 +70,7 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### Other ###
+run/
+.kotlin/

@@ -13,7 +13,6 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
 
 object BlockBreakListener : Listener {
-
     @EventHandler
     fun onBlockBreak(event: BlockBreakEvent) {
         val location = event.block.location

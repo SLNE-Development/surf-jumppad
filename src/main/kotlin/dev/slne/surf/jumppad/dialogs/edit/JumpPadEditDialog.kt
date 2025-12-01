@@ -92,10 +92,10 @@ object JumpPadEditDialog {
                     }
                 }
                 input {
-                    numberRange(STRENGTH_KEY, 1.0..100.0) {
+                    numberRange(STRENGTH_KEY, 1.0..10.0) {
                         label { text("Stärke") }
                         initial(pad.strength.toFloat())
-                        step(1.0f)
+                        step(.1f)
                         width(400)
                     }
                 }

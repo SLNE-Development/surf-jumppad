@@ -10,12 +10,13 @@ import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.bukkit.event.block.BlockBreakEvent
+import org.bukkit.event.player.PlayerInteractEvent
 
-object BlockBreakListener : Listener {
+object PlayerInteractListener : Listener {
     @EventHandler
-    fun onBlockBreak(event: BlockBreakEvent) {
-        val location = event.block.location
+    fun onBlockInteract(event: PlayerInteractEvent) {
+        val block = event.clickedBlock ?: return
+        val location = block.location
         val player = event.player
 
         val padAtBlock = jumpPadService.getPadAt(location)
@@ -33,7 +34,7 @@ object BlockBreakListener : Listener {
 
         player.sendText {
             appendPrefix()
-            error("Dies ist ein JumpPad und kann nicht entfernt werden.")
+            error("An dieser Stelle befindet sich ein JumpPad!")
             appendNewPrefixedLine()
             error("Klicke ")
             append(clickable)

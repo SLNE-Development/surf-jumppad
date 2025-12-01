@@ -27,7 +27,7 @@ object JumpPadCreateSuccessDialog {
                 plainMessage(400) {
                     success("Erfolg!", TextDecoration.BOLD)
                     appendNewline(2)
-                    success("Das JumpPad wurde erfolgreich erstellt")
+                    success("Das JumpPad wurde erfolgreich erstellt!")
                 }
             }
         }

@@ -1,5 +1,4 @@
 @file:Suppress("UnstableApiUsage")
-@file:OptIn(dev.slne.surf.surfapi.bukkit.api.nms.NmsUseWithCaution::class)
 
 package dev.slne.surf.jumppad.dialogs.view
 
@@ -13,15 +12,12 @@ import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
 import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
 import dev.slne.surf.surfapi.bukkit.api.dialog.type
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
-import dev.slne.surf.surfapi.core.api.messages.Colors
-import dev.slne.surf.surfapi.core.api.messages.CommonComponents
 import dev.slne.surf.surfapi.core.api.messages.adventure.appendNewline
 import dev.slne.surf.surfapi.core.api.util.toObjectSet
 import io.papermc.paper.dialog.Dialog
 import io.papermc.paper.registry.data.dialog.DialogBase
 
 object JumpPadListDialog {
-
     fun showDialog(): Dialog {
         val pads = jumpPadService.getPads()
 
@@ -30,8 +26,7 @@ object JumpPadListDialog {
             return dialog {
                 base {
                     title {
-                        primary("JUMPPAD ".toSmallCaps())
-                        primary("LISTE".toSmallCaps())
+                        primary("JUMPPAD LISTE".toSmallCaps())
                     }
                     body {
                         plainMessage(300) {
@@ -48,9 +43,7 @@ object JumpPadListDialog {
         return dialog {
             base {
                 title {
-                    primary("JUMPPAD".toSmallCaps())
-                    append(CommonComponents.EM_DASH)
-                    primary("LISTE".toSmallCaps())
+                    primary("JUMPPAD LISTE".toSmallCaps())
                 }
                 afterAction(DialogBase.DialogAfterAction.WAIT_FOR_RESPONSE)
 
@@ -60,14 +53,44 @@ object JumpPadListDialog {
                         variableValue(pads.size)
                         info(" JumpPads.")
                         appendNewline(2)
+
                         spacer("- ")
-                        text("Horizontal: ", Colors.YELLOW)
-                        variableValue(pads.count { it.type == JumpPadType.HORIZONTAL })
+                        info("Horizontal: ")
+                        variableValue(
+                            pads.count {
+                                it.type == JumpPadType.HORIZONTAL_NORTH ||
+                                        it.type == JumpPadType.HORIZONTAL_SOUTH ||
+                                        it.type == JumpPadType.HORIZONTAL_EAST ||
+                                        it.type == JumpPadType.HORIZONTAL_WEST
+                            }
+                        )
                         appendNewline()
+
+                        spacer("   • ")
+                        info("Nord: ")
+                        variableValue(pads.count { it.type == JumpPadType.HORIZONTAL_NORTH })
+                        appendNewline()
+
+                        spacer("   • ")
+                        info("Süd: ")
+                        variableValue(pads.count { it.type == JumpPadType.HORIZONTAL_SOUTH })
+                        appendNewline()
+
+                        spacer("   • ")
+                        info("Ost: ")
+                        variableValue(pads.count { it.type == JumpPadType.HORIZONTAL_EAST })
+                        appendNewline()
+
+                        spacer("   • ")
+                        info("West: ")
+                        variableValue(pads.count { it.type == JumpPadType.HORIZONTAL_WEST })
+                        appendNewline(2)
+
                         spacer("- ")
-                        text("Vertikal: ", Colors.RED)
+                        info("Vertikal: ")
                         variableValue(pads.count { it.type == JumpPadType.VERTICAL })
                     }
+
                 }
             }
 
@@ -75,7 +98,7 @@ object JumpPadListDialog {
                 dialogList {
                     addAll(dialogList)
                     buttonWidth(200)
-                    columns(1)
+                    columns(3)
                     exitAction(backButton())
                 }
             }

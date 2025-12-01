@@ -1,5 +1,4 @@
 @file:Suppress("UnstableApiUsage")
-@file:OptIn(NmsUseWithCaution::class)
 
 package dev.slne.surf.jumppad.dialogs
 
@@ -11,14 +10,11 @@ import dev.slne.surf.surfapi.bukkit.api.dialog.base
 import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
 import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
 import dev.slne.surf.surfapi.bukkit.api.dialog.type
-import dev.slne.surf.surfapi.bukkit.api.nms.NmsUseWithCaution
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
-import dev.slne.surf.surfapi.core.api.messages.Colors
 import dev.slne.surf.surfapi.core.api.messages.adventure.appendNewline
 import io.papermc.paper.registry.data.dialog.ActionButton
 
 object JumpPadMainDialog {
-
     fun showDialog() = dialog {
         base {
             val pads = jumpPadService.getPads()
@@ -30,15 +26,46 @@ object JumpPadMainDialog {
                     variableValue(pads.size)
                     info(" JumpPads.")
                     appendNewline(2)
+
                     spacer("- ")
-                    text("Horizontal: ", Colors.YELLOW)
-                    variableValue(pads.filter { it.type == JumpPadType.HORIZONTAL }.size)
+                    info("Horizontal: ")
+                    variableValue(
+                        pads.count {
+                            it.type == JumpPadType.HORIZONTAL_NORTH ||
+                                    it.type == JumpPadType.HORIZONTAL_SOUTH ||
+                                    it.type == JumpPadType.HORIZONTAL_EAST ||
+                                    it.type == JumpPadType.HORIZONTAL_WEST
+                        }
+                    )
                     appendNewline()
+
+                    spacer("   • ")
+                    info("Nord: ")
+                    variableValue(pads.count { it.type == JumpPadType.HORIZONTAL_NORTH })
+                    appendNewline()
+
+                    spacer("   • ")
+                    info("Süd: ")
+                    variableValue(pads.count { it.type == JumpPadType.HORIZONTAL_SOUTH })
+                    appendNewline()
+
+                    spacer("   • ")
+                    info("Ost: ")
+                    variableValue(pads.count { it.type == JumpPadType.HORIZONTAL_EAST })
+                    appendNewline()
+
+                    spacer("   • ")
+                    info("West: ")
+                    variableValue(pads.count { it.type == JumpPadType.HORIZONTAL_WEST })
+                    appendNewline(2)
+
                     spacer("- ")
-                    text("Vertikal: ", Colors.RED)
-                    variableValue(pads.filter { it.type == JumpPadType.VERTICAL }.size)
+                    info("Vertikal: ")
+                    variableValue(pads.count { it.type == JumpPadType.VERTICAL })
                 }
+
             }
+
         }
 
         type {

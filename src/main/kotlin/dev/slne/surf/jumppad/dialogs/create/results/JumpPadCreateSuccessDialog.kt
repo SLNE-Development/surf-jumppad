@@ -1,5 +1,4 @@
 @file:Suppress("UnstableApiUsage")
-@file:OptIn(NmsUseWithCaution::class)
 
 package dev.slne.surf.jumppad.dialogs.create.results
 
@@ -10,12 +9,10 @@ import dev.slne.surf.surfapi.bukkit.api.dialog.base
 import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
 import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
 import dev.slne.surf.surfapi.bukkit.api.dialog.type
-import dev.slne.surf.surfapi.bukkit.api.nms.NmsUseWithCaution
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import io.papermc.paper.registry.data.dialog.ActionButton
 
 object JumpPadCreateSuccessDialog {
-
     fun showDialog(pad: JumpPad) = dialog {
         base {
             title {

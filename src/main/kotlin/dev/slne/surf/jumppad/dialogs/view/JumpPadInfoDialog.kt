@@ -1,29 +1,22 @@
 @file:Suppress("UnstableApiUsage")
-@file:OptIn(dev.slne.surf.surfapi.bukkit.api.nms.NmsUseWithCaution::class)
 
 package dev.slne.surf.jumppad.dialogs.view
 
 import dev.slne.surf.jumppad.dialogs.delete.JumpPadDeleteDialog
-import dev.slne.surf.jumppad.dialogs.edit.JumpPadConfigurationDialog
+import dev.slne.surf.jumppad.dialogs.edit.JumpPadEditDialog
 import dev.slne.surf.jumppad.pad.JumpPad
-import dev.slne.surf.jumppad.pad.JumpPadType
 import dev.slne.surf.surfapi.bukkit.api.dialog.base
 import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
 import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
 import dev.slne.surf.surfapi.bukkit.api.dialog.type
-import dev.slne.surf.surfapi.core.api.messages.Colors
 import dev.slne.surf.surfapi.core.api.messages.adventure.appendNewline
 import io.papermc.paper.dialog.Dialog
 
 object JumpPadInfoDialog {
-
     fun showDialog(pad: JumpPad): Dialog = dialog {
         base {
             title {
-                if (pad.type == JumpPadType.HORIZONTAL) {
-                    text("${pad.origin.blockX} ${pad.origin.blockY} ${pad.origin.blockZ}", Colors.YELLOW)
-                } else
-                    text("${pad.origin.blockX} ${pad.origin.blockY} ${pad.origin.blockZ}", Colors.RED)
+                variableValue("${pad.origin.blockX} ${pad.origin.blockY} ${pad.origin.blockZ}")
             }
             body {
                 plainMessage(300) {
@@ -107,7 +100,7 @@ object JumpPadInfoDialog {
         tooltip { info("Klicke hier, um die Einstellungen des JumpPads zu konfigurieren.") }
         action {
             playerCallback {
-                it.showDialog(JumpPadConfigurationDialog.showDialog(pad))
+                it.showDialog(JumpPadEditDialog.showDialog(pad))
             }
         }
     }

@@ -1,9 +1,8 @@
 @file:Suppress("UnstableApiUsage")
-@file:OptIn(dev.slne.surf.surfapi.bukkit.api.nms.NmsUseWithCaution::class)
 
 package dev.slne.surf.jumppad.dialogs.edit
 
-import dev.slne.surf.jumppad.dialogs.edit.result.JumpPadConfiguartionFailResultDialog
+import dev.slne.surf.jumppad.dialogs.edit.result.JumpPadEditFailResultDialog
 import dev.slne.surf.jumppad.dialogs.view.JumpPadInfoDialog
 import dev.slne.surf.jumppad.pad.JumpPad
 import dev.slne.surf.jumppad.pad.JumpPadType
@@ -13,7 +12,6 @@ import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
 import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
 import dev.slne.surf.surfapi.bukkit.api.dialog.type
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
-import dev.slne.surf.surfapi.core.api.messages.Colors
 import dev.slne.surf.surfapi.core.api.messages.adventure.appendNewline
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import io.papermc.paper.registry.data.dialog.ActionButton
@@ -21,13 +19,16 @@ import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.entity.Player
 
-object JumpPadConfigurationDialog {
-
+object JumpPadEditDialog {
     private const val LOCATION_KEY = "pad_location"
     private const val STRENGTH_KEY = "pad_strength"
     private const val BOX_KEY = "pad_box"
     private const val TYPE_KEY = "pad_type"
-    private const val TYPE_KEY_HORIZONTAL = "pad_type_horizontal"
+
+    private const val TYPE_KEY_HORIZONTAL_NORTH = "pad_type_horizontal_north"
+    private const val TYPE_KEY_HORIZONTAL_SOUTH = "pad_type_horizontal_south"
+    private const val TYPE_KEY_HORIZONTAL_EAST = "pad_type_horizontal_east"
+    private const val TYPE_KEY_HORIZONTAL_WEST = "pad_type_horizontal_west"
     private const val TYPE_KEY_VERTICAL = "pad_type_vertical"
 
     private val locationRegex by lazy { Regex("^-?\\d+\\s-?\\d+\\s-?\\d+\$") }
@@ -39,81 +40,80 @@ object JumpPadConfigurationDialog {
                 primary("JUMPPAD ".toSmallCaps())
                 primary("LISTE ".toSmallCaps())
                 success("KONFIGURIEREN ".toSmallCaps())
-                if (pad.type == JumpPadType.HORIZONTAL) {
-                    text("${pad.origin.blockX} ${pad.origin.blockY} ${pad.origin.blockZ} ", Colors.YELLOW)
-                } else
-                    text("${pad.origin.blockX} ${pad.origin.blockY} ${pad.origin.blockZ} ", Colors.RED)
-            }
+                variableValue("${pad.origin.blockX} ${pad.origin.blockY} ${pad.origin.blockZ} ")
 
-            body {
-                plainMessage(400) {
-                    info("Du konfigurierst gerade ein JumpPad.")
-                    appendNewline(2)
-                    primary("UUID: ")
-                    variableValue(pad.uuid.toString())
-                    appendNewline(2)
+                body {
+                    plainMessage(400) {
+                        info("Du konfigurierst gerade ein JumpPad.")
+                        appendNewline(2)
+                        primary("UUID: ")
+                        variableValue(pad.uuid.toString())
+                        appendNewline(2)
 
-                    info("Im Folgenden siehst du die aktuellen Werte des JumpPads.")
-                    appendNewline(2)
+                        info("Im Folgenden siehst du die aktuellen Werte des JumpPads.")
+                        appendNewline(2)
 
-                    primary("Typ: ")
-                    variableValue(pad.type.name)
-                    appendNewline(2)
+                        primary("Typ: ")
+                        variableValue(pad.type.name)
+                        appendNewline(2)
 
-                    primary("Position: ")
-                    variableValue("${pad.origin.blockX} ${pad.origin.blockY} ${pad.origin.blockZ} ")
-                    appendNewline(2)
+                        primary("Position: ")
+                        variableValue("${pad.origin.blockX} ${pad.origin.blockY} ${pad.origin.blockZ} ")
+                        appendNewline(2)
 
-                    primary("Welt: ")
-                    variableValue(pad.origin.world?.name.toString())
-                    appendNewline(2)
+                        primary("Welt: ")
+                        variableValue(pad.origin.world?.name.toString())
+                        appendNewline(2)
 
-                    primary("Stärke: ")
-                    variableValue(pad.strength.toString())
-                    appendNewline(2)
+                        primary("Stärke: ")
+                        variableValue(pad.strength.toString())
+                        appendNewline(2)
 
-                    primary("Breite: ")
-                    variableValue(pad.width.toString())
-                    appendNewline(2)
+                        primary("Breite: ")
+                        variableValue(pad.width.toString())
+                        appendNewline(2)
 
-                    primary("Länge: ")
-                    variableValue(pad.length.toString())
+                        primary("Länge: ")
+                        variableValue(pad.length.toString())
+                    }
+                }
+                input {
+                    text(LOCATION_KEY) {
+                        label { text("Location") }
+                        initial("${pad.origin.blockX} ${pad.origin.blockY} ${pad.origin.blockZ}")
+                        width(400)
+                    }
+                }
+                input {
+                    text(BOX_KEY) {
+                        label { text("Box") }
+                        initial("${pad.width}x${pad.length}")
+                        width(400)
+                    }
+                }
+                input {
+                    numberRange(STRENGTH_KEY, 1.0..100.0) {
+                        label { text("Stärke") }
+                        initial(pad.strength.toFloat())
+                        step(1.0f)
+                        width(400)
+                    }
+                }
+                input {
+                    singleOption(TYPE_KEY) {
+                        label { text("JumpPad-Typ") }
+                        option(TYPE_KEY_HORIZONTAL_NORTH, buildText { text("Horizontal Nord") })
+                        option(TYPE_KEY_HORIZONTAL_SOUTH, buildText { text("Horizontal Süd") })
+                        option(TYPE_KEY_HORIZONTAL_EAST, buildText { text("Horizontal Ost") })
+                        option(TYPE_KEY_HORIZONTAL_WEST, buildText { text("Horizontal West") })
+                        option(TYPE_KEY_VERTICAL, buildText { text("Vertikal") })
+                    }
                 }
             }
-            input {
-                text(LOCATION_KEY) {
-                    label { text("Location") }
-                    initial("${pad.origin.blockX} ${pad.origin.blockY} ${pad.origin.blockZ}")
-                    width(400)
-                }
-            }
-            input {
-                text(BOX_KEY) {
-                    label { text("Box") }
-                    initial("${pad.width}x${pad.length}")
-                    width(400)
-                }
-            }
-            input {
-                numberRange(STRENGTH_KEY, 1.0..500.0) {
-                    label { text("Stärke") }
-                    initial(pad.strength.toFloat())
-                    step(1.0f)
-                    width(400)
-                }
-            }
-            input {
-                singleOption(TYPE_KEY) {
-                    label { text("JumpPad-Typ") }
-                    option(TYPE_KEY_HORIZONTAL, buildText { text("Horizontal") })
-                    option(TYPE_KEY_VERTICAL, buildText { text("Vertikal") })
 
-                }
+            type {
+                confirmation(saveButton(pad), backButton(pad))
             }
-        }
-
-        type {
-            confirmation(saveButton(pad), backButton(pad))
         }
     }
 
@@ -132,7 +132,7 @@ object JumpPadConfigurationDialog {
                 val validBox = boxRegex.matches(boxString)
 
                 if (!validLocation || !validBox) {
-                    player.showDialog(JumpPadConfiguartionFailResultDialog.showDialog(oldPad))
+                    player.showDialog(JumpPadEditFailResultDialog.showDialog(oldPad))
                     return@customClick
                 }
                 val origin = parseLocation(locationString, player.location.world)
@@ -141,8 +141,11 @@ object JumpPadConfigurationDialog {
 
                 val type = when (content.getText(TYPE_KEY)) {
                     TYPE_KEY_VERTICAL -> JumpPadType.VERTICAL
-                    TYPE_KEY_HORIZONTAL -> JumpPadType.HORIZONTAL
-                    else -> JumpPadType.HORIZONTAL
+                    TYPE_KEY_HORIZONTAL_NORTH -> JumpPadType.HORIZONTAL_NORTH
+                    TYPE_KEY_HORIZONTAL_SOUTH -> JumpPadType.HORIZONTAL_SOUTH
+                    TYPE_KEY_HORIZONTAL_EAST -> JumpPadType.HORIZONTAL_EAST
+                    TYPE_KEY_HORIZONTAL_WEST -> JumpPadType.HORIZONTAL_WEST
+                    else -> oldPad.type
                 }
 
                 val updatedPad = oldPad.copy(

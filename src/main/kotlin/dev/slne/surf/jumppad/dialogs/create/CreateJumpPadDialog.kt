@@ -1,4 +1,4 @@
-@file:Suppress("UnstableApiUsage") @file:OptIn(NmsUseWithCaution::class)
+@file:Suppress("UnstableApiUsage")
 
 package dev.slne.surf.jumppad.dialogs.create
 
@@ -12,7 +12,6 @@ import dev.slne.surf.surfapi.bukkit.api.dialog.base
 import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
 import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
 import dev.slne.surf.surfapi.bukkit.api.dialog.type
-import dev.slne.surf.surfapi.bukkit.api.nms.NmsUseWithCaution
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import dev.slne.surf.surfapi.core.api.messages.adventure.appendNewline
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
@@ -25,17 +24,19 @@ import org.bukkit.entity.Player
 import java.util.*
 
 object CreateJumpPadDialog {
-
     private const val LOCATION_KEY = "pad_location"
     private const val STRENGTH_KEY = "pad_strength"
     private const val BOX_KEY = "pad_box"
     private const val TYPE_KEY = "pad_type"
-    private const val TYPE_KEY_HORIZONTAL = "pad_type_horizontal"
+
+    private const val TYPE_KEY_HORIZONTAL_NORTH = "pad_type_horizontal_north"
+    private const val TYPE_KEY_HORIZONTAL_SOUTH = "pad_type_horizontal_south"
+    private const val TYPE_KEY_HORIZONTAL_EAST = "pad_type_horizontal_east"
+    private const val TYPE_KEY_HORIZONTAL_WEST = "pad_type_horizontal_west"
     private const val TYPE_KEY_VERTICAL = "pad_type_vertical"
 
-    private val locationRegex by lazy { Regex("^-?\\d+\\s-?\\d+\\s-?\\d+\$") }
+    private val locationRegex by lazy { Regex("^-?\\d+\\s-?\\d+\\s-?\\d+$") }
     private val boxRegex by lazy { Regex("^\\d+x\\d+$") }
-
 
     fun showDialog(player: Player) = dialog {
         val uuid = UUID.randomUUID()
@@ -68,7 +69,7 @@ object CreateJumpPadDialog {
                 }
             }
             input {
-                numberRange(STRENGTH_KEY, 1.0..500.0) {
+                numberRange(STRENGTH_KEY, 1.0..100.0) {
                     label { text("Stärke") }
                     step(1.0f)
                     width(400)
@@ -77,11 +78,13 @@ object CreateJumpPadDialog {
             input {
                 singleOption(TYPE_KEY) {
                     label { text("JumpPad-Typ") }
-                    option(TYPE_KEY_HORIZONTAL, buildText { text("Horizontal") })
+                    option(TYPE_KEY_HORIZONTAL_NORTH, buildText { text("Horizontal Nord") })
+                    option(TYPE_KEY_HORIZONTAL_SOUTH, buildText { text("Horizontal Süd") })
+                    option(TYPE_KEY_HORIZONTAL_EAST, buildText { text("Horizontal Ost") })
+                    option(TYPE_KEY_HORIZONTAL_WEST, buildText { text("Horizontal West") })
                     option(TYPE_KEY_VERTICAL, buildText { text("Vertikal") })
                 }
             }
-
         }
 
         type {
@@ -116,9 +119,12 @@ object CreateJumpPadDialog {
                 val strength = strengthFloat.toDouble()
 
                 val type = when (content.getText(TYPE_KEY)) {
+                    TYPE_KEY_HORIZONTAL_NORTH -> JumpPadType.HORIZONTAL_NORTH
+                    TYPE_KEY_HORIZONTAL_SOUTH -> JumpPadType.HORIZONTAL_SOUTH
+                    TYPE_KEY_HORIZONTAL_EAST -> JumpPadType.HORIZONTAL_EAST
+                    TYPE_KEY_HORIZONTAL_WEST -> JumpPadType.HORIZONTAL_WEST
                     TYPE_KEY_VERTICAL -> JumpPadType.VERTICAL
-                    TYPE_KEY_HORIZONTAL -> JumpPadType.HORIZONTAL
-                    else -> JumpPadType.HORIZONTAL
+                    else -> JumpPadType.HORIZONTAL_NORTH
                 }
 
                 val pad = JumpPad(
@@ -172,10 +178,12 @@ object CreateJumpPadDialog {
         val halfWidth = pad.width / 2
         val halfLength = pad.length / 2
 
-        val blockType = if (pad.type == JumpPadType.HORIZONTAL) {
-            Material.GREEN_WOOL
-        } else {
-            Material.RED_WOOL
+        val blockType = when (pad.type) {
+            JumpPadType.VERTICAL -> Material.RED_WOOL
+            JumpPadType.HORIZONTAL_NORTH -> Material.BLUE_WOOL
+            JumpPadType.HORIZONTAL_SOUTH -> Material.YELLOW_WOOL
+            JumpPadType.HORIZONTAL_EAST -> Material.GREEN_WOOL
+            JumpPadType.HORIZONTAL_WEST -> Material.ORANGE_WOOL
         }
 
         for (dx in -halfWidth..halfWidth) {

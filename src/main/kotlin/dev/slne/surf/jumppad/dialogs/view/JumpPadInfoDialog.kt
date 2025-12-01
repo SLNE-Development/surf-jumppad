@@ -20,7 +20,7 @@ object JumpPadInfoDialog {
             }
             body {
                 plainMessage(300) {
-                    info("Alle relevanten Informationen siehst du im Folgenden.")
+                    info("Alle relevanten Informationen zum JumpPad siehst du im Folgenden.")
                     appendNewline(4)
 
                     primary("UUID: ")

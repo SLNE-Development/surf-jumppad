@@ -10,7 +10,9 @@ import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
 import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
 import dev.slne.surf.surfapi.bukkit.api.dialog.type
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
+import dev.slne.surf.surfapi.core.api.messages.adventure.appendNewline
 import io.papermc.paper.registry.data.dialog.ActionButton
+import net.kyori.adventure.text.format.TextDecoration
 
 object JumpPadCreateSuccessDialog {
     fun showDialog(pad: JumpPad) = dialog {
@@ -23,7 +25,9 @@ object JumpPadCreateSuccessDialog {
 
             body {
                 plainMessage(400) {
-                    info("Das JumpPad wurde erfolgreich erstellt")
+                    success("Erfolg!", TextDecoration.BOLD)
+                    appendNewline(2)
+                    success("Das JumpPad wurde erfolgreich erstellt")
                 }
             }
         }

@@ -8,7 +8,9 @@ import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
 import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
 import dev.slne.surf.surfapi.bukkit.api.dialog.type
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
+import dev.slne.surf.surfapi.core.api.messages.adventure.appendNewline
 import io.papermc.paper.registry.data.dialog.ActionButton
+import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.entity.Player
 
 object JumpPadCreationFailResultDialog {
@@ -22,7 +24,9 @@ object JumpPadCreationFailResultDialog {
 
             body {
                 plainMessage(400) {
-                    info("Die angegebenen Felder wurden nicht korrekt ausgefüllt. Bitte versuche es erneut.")
+                    error("Fehler!", TextDecoration.BOLD)
+                    appendNewline(2)
+                    error("Die angegebenen Felder wurden nicht korrekt ausgefüllt. Bitte versuche es erneut.")
                 }
             }
         }

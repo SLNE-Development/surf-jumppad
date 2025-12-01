@@ -22,7 +22,6 @@ object PlayerMoveListener : Listener {
         val player = event.player
 
         if (player.gameMode == GameMode.SPECTATOR) return
-
         val pad = jumpPadService.getPadAt(event.to) ?: return
 
         val now = System.currentTimeMillis()
@@ -39,7 +38,6 @@ object PlayerMoveListener : Listener {
             JumpPadType.VERTICAL -> Vector(0.0, strength, 0.0)
         }
         player.velocity = velocity
-
         animationService.playAnimation(player, pad.type)
         soundService.playSound(player, pad.type)
     }

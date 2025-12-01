@@ -17,9 +17,7 @@ import dev.slne.surf.surfapi.core.api.messages.adventure.appendNewline
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import io.papermc.paper.registry.data.dialog.ActionButton
 import org.bukkit.Location
-import org.bukkit.Material
 import org.bukkit.World
-import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import java.util.*
 
@@ -136,7 +134,7 @@ object CreateJumpPadDialog {
                     type = type
                 )
                 jumpPadService.addPad(pad)
-                markPadArea(pad)
+                jumpPadService.visualizePadForAll(pad)
                 player.showDialog(JumpPadCreateSuccessDialog.showDialog(pad))
             }
         }
@@ -169,32 +167,5 @@ object CreateJumpPadDialog {
         val y = parts[1].toDoubleOrNull() ?: 0.0
         val z = parts[2].toDoubleOrNull() ?: 0.0
         return Location(world, x, y, z)
-    }
-
-    private fun markPadArea(pad: JumpPad) {
-        val origin = pad.origin
-        val world = origin.world
-
-        val halfWidth = pad.width / 2
-        val halfLength = pad.length / 2
-
-        val blockType = when (pad.type) {
-            JumpPadType.VERTICAL -> Material.RED_WOOL
-            JumpPadType.HORIZONTAL_NORTH -> Material.BLUE_WOOL
-            JumpPadType.HORIZONTAL_SOUTH -> Material.YELLOW_WOOL
-            JumpPadType.HORIZONTAL_EAST -> Material.GREEN_WOOL
-            JumpPadType.HORIZONTAL_WEST -> Material.ORANGE_WOOL
-        }
-
-        for (dx in -halfWidth..halfWidth) {
-            for (dz in -halfLength..halfLength) {
-                val x = origin.blockX + dx
-                val y = origin.blockY - 1
-                val z = origin.blockZ + dz
-
-                val block: Block = world.getBlockAt(x, y, z)
-                block.type = blockType
-            }
-        }
     }
 }

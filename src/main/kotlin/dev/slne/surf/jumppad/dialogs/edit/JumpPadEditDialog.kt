@@ -158,6 +158,7 @@ object JumpPadEditDialog {
                 )
 
                 jumpPadService.updatePad(updatedPad)
+                jumpPadService.updatePadVisualization(updatedPad)
                 player.showDialog(JumpPadInfoDialog.showDialog(updatedPad))
             }
         }

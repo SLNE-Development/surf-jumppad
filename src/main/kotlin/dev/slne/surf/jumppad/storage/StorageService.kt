@@ -69,7 +69,7 @@ class StorageService {
             config.save(file)
         }
 
-        logger().atInfo().log("Successfully saved ${pads.size} NPCs to files!")
+        logger().atInfo().log("Successfully saved ${pads.size} JumpPads to files!")
     }
 
     companion object {

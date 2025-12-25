@@ -107,7 +107,7 @@ object CreateJumpPadDialog {
                 val validBox = boxRegex.matches(boxString)
 
                 if (!validLocation || !validBox) {
-                    player.showDialog(JumpPadCreationFailResultDialog.showDialog(player))
+                    player.showDialog(JumpPadCreationFailResultDialog.showDialog())
                     return@customClick
                 }
 
@@ -115,7 +115,7 @@ object CreateJumpPadDialog {
                 val (width, length) = parseBox(boxString)
 
                 if (width > 10 || length > 10) {
-                    player.showDialog(JumpPadCreationFailResultDialog.showDialog(player))
+                    player.showDialog(JumpPadCreationFailResultDialog.showDialog())
                     return@customClick
                 }
 

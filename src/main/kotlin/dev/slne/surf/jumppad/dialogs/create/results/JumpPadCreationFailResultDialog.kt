@@ -11,10 +11,9 @@ import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import dev.slne.surf.surfapi.core.api.messages.adventure.appendNewline
 import io.papermc.paper.registry.data.dialog.ActionButton
 import net.kyori.adventure.text.format.TextDecoration
-import org.bukkit.entity.Player
 
 object JumpPadCreationFailResultDialog {
-    fun showDialog(player: Player) = dialog {
+    fun showDialog() = dialog {
         base {
             title {
                 primary("JUMPPAD ".toSmallCaps())
@@ -34,18 +33,18 @@ object JumpPadCreationFailResultDialog {
         }
 
         type {
-            notice(backButton(player))
+            notice(backButton())
         }
     }
 
-    private fun backButton(player: Player): ActionButton = actionButton {
+    private fun backButton(): ActionButton = actionButton {
         label { spacer("Zurück") }
         tooltip {
             info("Klicke hier, um zurück zur Erstellung zu gelangen.")
         }
         action {
             playerCallback {
-                it.showDialog(CreateJumpPadDialog.showDialog(player))
+                it.showDialog(CreateJumpPadDialog.showDialog(it))
             }
         }
     }

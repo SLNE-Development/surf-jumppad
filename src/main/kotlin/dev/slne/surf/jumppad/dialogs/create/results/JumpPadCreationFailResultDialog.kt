@@ -25,8 +25,10 @@ object JumpPadCreationFailResultDialog {
                 plainMessage(400) {
                     error("Fehler!", TextDecoration.BOLD)
                     appendNewline(2)
+
                     error("Die angegebenen Felder wurden nicht korrekt ausgefüllt.")
                     appendNewline(2)
+
                     error("Bitte versuche es erneut.")
                 }
             }

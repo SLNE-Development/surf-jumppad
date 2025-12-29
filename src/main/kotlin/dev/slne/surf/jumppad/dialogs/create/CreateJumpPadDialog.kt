@@ -48,8 +48,10 @@ object CreateJumpPadDialog {
                 plainMessage(400) {
                     info("Du bist dabei ein neues JumpPad zu erstellen.")
                     appendNewline(2)
+
                     primary("UUID: ")
                     variableValue(uuid.toString())
+                    appendNewline(2)
                 }
             }
             input {
@@ -139,7 +141,6 @@ object CreateJumpPadDialog {
                     type = type
                 )
                 jumpPadService.addPad(pad)
-                jumpPadService.visualizePadForAll(pad)
                 player.showDialog(JumpPadCreateSuccessDialog.showDialog(pad))
             }
         }

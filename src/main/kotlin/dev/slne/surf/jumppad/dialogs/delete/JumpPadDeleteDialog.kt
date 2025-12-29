@@ -28,10 +28,13 @@ object JumpPadDeleteDialog {
                     plainMessage(300) {
                         error("Achtung!", TextDecoration.BOLD)
                         appendNewline(2)
+
                         error("Du bist dabei ein JumpPad unwiderruflich zu löschen!")
                         appendNewline(2)
+
                         error("Bitte bestätige dein Vorhaben!")
                         appendNewline(2)
+
                         info("Im Folgenden findest du die Informationen zum ausgewählten JumpPad.")
                         appendNewline(2)
 
@@ -48,19 +51,16 @@ object JumpPadDeleteDialog {
                         appendNewline(2)
 
                         primary("Welt: ")
-                        variableValue(pad.origin.world?.name.toString())
+                        variableValue(pad.origin.world?.name ?: "Unbekannt")
                         appendNewline(2)
 
                         primary("Stärke: ")
-                        variableValue(pad.strength.toString())
+                        variableValue(pad.strength)
                         appendNewline(2)
 
-                        primary("Breite: ")
-                        variableValue(pad.width.toString())
+                        primary("Box: ")
+                        variableValue("${pad.width}x${pad.length}")
                         appendNewline(2)
-
-                        primary("Länge: ")
-                        variableValue(pad.length.toString())
                     }
                 }
             }
@@ -85,7 +85,6 @@ object JumpPadDeleteDialog {
         tooltip { info("Klicke hier, um das jumpPad zu löschen.") }
         action {
             playerCallback {
-                jumpPadService.removePadVisualization(pad)
                 jumpPadService.deletePad(pad)
                 it.showDialog(JumpPadListDialog.showDialog())
             }

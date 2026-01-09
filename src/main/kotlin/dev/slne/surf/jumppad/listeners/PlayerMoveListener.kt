@@ -36,6 +36,7 @@ object PlayerMoveListener : Listener {
             JumpPadType.HORIZONTAL_NORTH -> Vector(0.0, 0.0, -strength)
             JumpPadType.HORIZONTAL_SOUTH -> Vector(0.0, 0.0, strength)
             JumpPadType.VERTICAL -> Vector(0.0, strength, 0.0)
+            JumpPadType.ELEVATOR -> Vector(0.0, strength, 0.0)
         }
         player.velocity = velocity
         animationService.playAnimation(player, pad.type)

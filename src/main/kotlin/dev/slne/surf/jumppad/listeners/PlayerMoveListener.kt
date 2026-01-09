@@ -10,9 +10,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.util.Vector
-import java.lang.Math.pow
 import java.util.*
-import kotlin.math.pow
 import kotlin.time.Duration.Companion.seconds
 
 object PlayerMoveListener : Listener {
@@ -56,63 +54,83 @@ object PlayerMoveListener : Listener {
         val dz = target.z - playerLocation.z
         
         // Minecraft physics constants
-        val gravity = 0.08 // blocks/tick^2
-        val drag = 0.98 // velocity multiplier per tick
+        // In Minecraft, each tick: velocity = (velocity - gravity) * drag
+        val gravity = 0.08
+        val drag = 0.98
+        
+        // Use strength parameter to control the speed/time of flight
+        // Higher strength = faster/shorter flight time
+        val desiredSpeed = pad.strength.coerceAtLeast(0.5)
         
         // Calculate horizontal distance
         val horizontalDistance = kotlin.math.sqrt(dx * dx + dz * dz)
         
-        // Estimate flight time based on strength parameter
-        // strength acts as a horizontal speed multiplier
-        val estimatedHorizontalSpeed = pad.strength.coerceAtLeast(0.1)
+        // Estimate flight time: we want to reach the target in reasonable time
+        // Start with an estimate based on desired speed
+        var bestVelocityX = 0.0
+        var bestVelocityY = 0.0
+        var bestVelocityZ = 0.0
+        var bestError = Double.MAX_VALUE
         
-        // Calculate flight time in ticks using iterative approach
-        // We estimate the time needed to cover the horizontal distance
-        var timeInTicks = horizontalDistance / estimatedHorizontalSpeed
+        // Try different flight times to find the best trajectory
+        val minTime = (horizontalDistance / (desiredSpeed * 2.0)).coerceAtLeast(10.0)
+        val maxTime = (horizontalDistance / (desiredSpeed * 0.5)).coerceAtMost(200.0)
         
-        // Ensure minimum flight time to avoid division issues
-        timeInTicks = timeInTicks.coerceAtLeast(1.0)
-        
-        // Calculate horizontal velocities
-        // With drag, velocity at tick t = v0 * drag^t
-        // Total distance = sum of (v0 * drag^t) for t=0 to timeInTicks
-        // This approximates to: v0 * (1 - drag^time) / (1 - drag)
-        val dragSum = if (drag < 1.0) {
-            (1 - drag.pow(timeInTicks)) / (1 - drag)
-        } else {
-            timeInTicks // fallback if drag is 1.0
-        }
-        
-        val velocityX = dx / dragSum
-        val velocityZ = dz / dragSum
-        
-        // Calculate vertical velocity needed
-        // With gravity and drag: position = sum of (v0 * drag^t - gravity * (t+1))
-        // Simplified: we need to account for both drag on velocity and cumulative gravity
-        var totalVerticalDisplacement = 0.0
-        var currentVelocityY = 1.0 // placeholder, we'll solve for this
-        
-        // Iterate to find the correct initial vertical velocity
-        // This accounts for drag reducing velocity and gravity accumulating
-        for (attempt in 0..10) {
-            totalVerticalDisplacement = 0.0
-            currentVelocityY = dy / dragSum + gravity * timeInTicks * 0.5 // initial estimate
+        for (estimatedTicks in minTime.toInt()..maxTime.toInt() step 5) {
+            // Simulate trajectory to find required initial velocities
+            var testVelX = dx / estimatedTicks
+            var testVelY = dy / estimatedTicks + gravity * estimatedTicks * 0.5
+            var testVelZ = dz / estimatedTicks
             
-            var tempVelocityY = currentVelocityY
-            for (tick in 0 until timeInTicks.toInt()) {
-                totalVerticalDisplacement += tempVelocityY
-                // Apply drag first, then subtract gravity (Minecraft physics order)
-                tempVelocityY = tempVelocityY * drag - gravity
+            // Iterate to refine the velocities
+            for (iteration in 0..20) {
+                var simX = 0.0
+                var simY = 0.0
+                var simZ = 0.0
+                var velX = testVelX
+                var velY = testVelY
+                var velZ = testVelZ
+                
+                // Simulate the trajectory
+                for (tick in 0 until estimatedTicks) {
+                    simX += velX
+                    simY += velY
+                    simZ += velZ
+                    
+                    // Apply Minecraft physics: (velocity - gravity) * drag
+                    velX *= drag
+                    velY = (velY - gravity) * drag
+                    velZ *= drag
+                }
+                
+                // Calculate error
+                val errorX = dx - simX
+                val errorY = dy - simY
+                val errorZ = dz - simZ
+                val totalError = kotlin.math.sqrt(errorX * errorX + errorY * errorY + errorZ * errorZ)
+                
+                // Check if this is the best solution so far
+                if (totalError < bestError) {
+                    bestError = totalError
+                    bestVelocityX = testVelX
+                    bestVelocityY = testVelY
+                    bestVelocityZ = testVelZ
+                }
+                
+                // If we're close enough, stop iterating
+                if (totalError < 0.1) break
+                
+                // Adjust velocities based on error
+                val adjustmentFactor = 0.5
+                testVelX += errorX / estimatedTicks * adjustmentFactor
+                testVelY += errorY / estimatedTicks * adjustmentFactor
+                testVelZ += errorZ / estimatedTicks * adjustmentFactor
             }
             
-            // Check if we're close enough
-            if (kotlin.math.abs(totalVerticalDisplacement - dy) < 0.1) break
-            
-            // Adjust estimate based on error
-            val error = dy - totalVerticalDisplacement
-            currentVelocityY += error / timeInTicks
+            // If we found a good enough solution, use it
+            if (bestError < 0.5) break
         }
         
-        return Vector(velocityX, currentVelocityY, velocityZ)
+        return Vector(bestVelocityX, bestVelocityY, bestVelocityZ)
     }
 }

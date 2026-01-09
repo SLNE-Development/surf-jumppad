@@ -176,7 +176,11 @@ object JumpPadEditDialog {
                 }
                 
                 // Parse target location if STATIC type
-                val target = if (type == JumpPadType.STATIC && locationRegex.matches(targetString)) {
+                val target = if (type == JumpPadType.STATIC) {
+                    if (!locationRegex.matches(targetString)) {
+                        player.showDialog(JumpPadEditFailResultDialog.showDialog(oldPad))
+                        return@customClick
+                    }
                     parseLocation(targetString, player.location.world)
                 } else {
                     null

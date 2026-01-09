@@ -53,33 +53,63 @@ object PlayerMoveListener : Listener {
         val dy = target.y - playerLocation.y
         val dz = target.z - playerLocation.z
         
-        // Minecraft gravity is 0.08 blocks/tick^2, with drag of 0.98 per tick
-        // We use a simplified calculation for the trajectory
-        val gravity = 0.08
-        val drag = 0.98
+        // Minecraft physics constants
+        val gravity = 0.08 // blocks/tick^2
+        val drag = 0.98 // velocity multiplier per tick
         
         // Calculate horizontal distance
         val horizontalDistance = kotlin.math.sqrt(dx * dx + dz * dz)
         
-        // Use the strength as a time factor to determine flight time
-        // Higher strength = faster arrival
-        val timeInTicks = if (pad.strength > 0) {
-            horizontalDistance / pad.strength * 20 // Approximate time in ticks
+        // Estimate flight time based on strength parameter
+        // strength acts as a horizontal speed multiplier
+        val estimatedHorizontalSpeed = pad.strength.coerceAtLeast(0.1)
+        
+        // Calculate flight time in ticks using iterative approach
+        // We estimate the time needed to cover the horizontal distance
+        var timeInTicks = horizontalDistance / estimatedHorizontalSpeed
+        
+        // Ensure minimum flight time to avoid division issues
+        timeInTicks = timeInTicks.coerceAtLeast(1.0)
+        
+        // Calculate horizontal velocities
+        // With drag, velocity at tick t = v0 * drag^t
+        // Total distance = sum of (v0 * drag^t) for t=0 to timeInTicks
+        // This approximates to: v0 * (1 - drag^time) / (1 - drag)
+        val dragSum = if (drag < 1.0) {
+            (1 - kotlin.math.pow(drag, timeInTicks)) / (1 - drag)
         } else {
-            20.0
+            timeInTicks // fallback if drag is 1.0
         }
         
-        // Calculate required velocities considering drag
-        // For drag, we need to account for velocity reduction over time
-        val dragFactor = (1 - kotlin.math.pow(drag, timeInTicks)) / (1 - drag)
-        
-        val velocityX = dx / dragFactor
-        val velocityZ = dz / dragFactor
+        val velocityX = dx / dragSum
+        val velocityZ = dz / dragSum
         
         // Calculate vertical velocity needed
-        // Formula: dy = v_y * time - 0.5 * g * time^2 (accounting for drag)
-        val velocityY = (dy + 0.5 * gravity * timeInTicks * timeInTicks) / dragFactor
+        // With gravity and drag: position = sum of (v0 * drag^t - gravity * (t+1))
+        // Simplified: we need to account for both drag on velocity and cumulative gravity
+        var totalVerticalDisplacement = 0.0
+        var currentVelocityY = 1.0 // placeholder, we'll solve for this
         
-        return Vector(velocityX, velocityY, velocityZ)
+        // Iterate to find the correct initial vertical velocity
+        // This accounts for drag reducing velocity and gravity accumulating
+        for (attempt in 0..10) {
+            totalVerticalDisplacement = 0.0
+            currentVelocityY = dy / dragSum + gravity * timeInTicks / 2.0 // initial estimate
+            
+            var tempVelocityY = currentVelocityY
+            for (tick in 0 until timeInTicks.toInt()) {
+                totalVerticalDisplacement += tempVelocityY
+                tempVelocityY = (tempVelocityY - gravity) * drag
+            }
+            
+            // Check if we're close enough
+            if (kotlin.math.abs(totalVerticalDisplacement - dy) < 0.1) break
+            
+            // Adjust estimate based on error
+            val error = dy - totalVerticalDisplacement
+            currentVelocityY += error / timeInTicks
+        }
+        
+        return Vector(velocityX, currentVelocityY, velocityZ)
     }
 }

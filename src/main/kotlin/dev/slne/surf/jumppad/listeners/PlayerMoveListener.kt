@@ -103,9 +103,10 @@ object PlayerMoveListener : Listener {
             1.0
         }
         
-        // Apply height adjustment factor by multiplying (not dividing) to increase time for height differences
-        val baseMinTime = ((totalDistance / (desiredSpeed * maxSpeedMultiplier)) * heightAdjustmentFactor).coerceAtLeast(minFlightTime)
-        val baseMaxTime = ((totalDistance / (desiredSpeed * minSpeedMultiplier)) * heightAdjustmentFactor).coerceAtMost(maxFlightTime)
+        // Apply height adjustment factor by multiplying to increase time for height differences
+        // Use horizontal distance as the base since vertical motion is handled by gravity
+        val baseMinTime = ((horizontalDistance / (desiredSpeed * maxSpeedMultiplier)) * heightAdjustmentFactor).coerceAtLeast(minFlightTime)
+        val baseMaxTime = ((horizontalDistance / (desiredSpeed * minSpeedMultiplier)) * heightAdjustmentFactor).coerceAtMost(maxFlightTime)
         
         // Ensure minTime doesn't exceed maxTime
         val effectiveMinTime = baseMinTime.coerceAtMost(baseMaxTime)

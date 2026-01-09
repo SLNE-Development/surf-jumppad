@@ -14,6 +14,7 @@ class AnimationService {
             JumpPadType.HORIZONTAL_SOUTH -> showHorizontal(player, Vector(0, 0, 1))
             JumpPadType.VERTICAL -> showVertical(player)
             else -> {}
+            JumpPadType.ELEVATOR -> showElevator(player)
         }
     }
 
@@ -36,6 +37,17 @@ class AnimationService {
             20,
             0.5, 0.5, 0.5,
             0.1
+        )
+    }
+
+    private fun showElevator(player: Player) {
+        val loc = player.location.clone()
+        player.world.spawnParticle(
+            Particle.CLOUD,
+            loc.x, loc.y, loc.z,
+            30,
+            0.3, 0.2, 0.3,
+            0.05
         )
     }
 

@@ -35,7 +35,75 @@ class JumpPadManager {
         }
     }
 
-    fun getPads(): List<JumpPad> = pads.toList()
+    fun visualizePadForAll(pad: JumpPad) {
+        for (player in server.onlinePlayers) {
+            visualizePad(player, pad)
+        }
+    }
+
+    fun visualizePadsForSpecific(player: Player) {
+        getPads().forEach { pad ->
+            visualizePad(player, pad)
+        }
+    }
+
+    private fun visualizePad(player: Player, pad: JumpPad) {
+        val origin = pad.origin
+        val world = origin.world
+
+        val halfWidth = pad.width / 2
+        val halfLength = pad.length / 2
+
+        val color = when (pad.type) {
+            JumpPadType.VERTICAL -> NamedTextColor.LIGHT_PURPLE
+            JumpPadType.HORIZONTAL_NORTH -> NamedTextColor.BLUE
+            JumpPadType.HORIZONTAL_SOUTH -> NamedTextColor.RED
+            JumpPadType.HORIZONTAL_EAST -> NamedTextColor.YELLOW
+            JumpPadType.HORIZONTAL_WEST -> NamedTextColor.GREEN
+            JumpPadType.ELEVATOR -> NamedTextColor.AQUA
+        }
+
+        for (dx in -halfWidth..halfWidth) {
+            for (dz in -halfLength..halfLength) {
+                val x = origin.blockX + dx
+                val y = origin.blockY - 1
+                val z = origin.blockZ + dz
+
+                val location = Location(world, x.toDouble(), y.toDouble(), z.toDouble())
+
+                glowingApi.makeGlowing(location, player, color)
+            }
+        }
+    }
+
+    fun updatePadVisualization(pad: JumpPad) {
+        removePadVisualization(pad)
+        visualizePadForAll(pad)
+    }
+
+    private fun removePadVisualization(pad: JumpPad) {
+        val origin = pad.origin
+        val world = origin.world
+
+        val halfWidth = pad.width / 2
+        val halfLength = pad.length / 2
+
+        for (dx in -halfWidth..halfWidth) {
+            for (dz in -halfLength..halfLength) {
+                val x = origin.blockX + dx
+                val y = origin.blockY - 1
+                val z = origin.blockZ + dz
+
+                val location = Location(world, x.toDouble(), y.toDouble(), z.toDouble())
+
+                for (player in server.onlinePlayers) {
+                    glowingApi.removeGlowing(location, player)
+                }
+            }
+        }
+    }
+  
+  fun getPads(): List<JumpPad> = pads.toList()
 
     companion object {
         val INSTANCE = JumpPadManager()

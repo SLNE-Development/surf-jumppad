@@ -15,6 +15,7 @@ class SoundManager {
             JumpPadType.HORIZONTAL_SOUTH -> playHorizontal(player)
             JumpPadType.VERTICAL -> playVertical(player)
             else -> {}
+            JumpPadType.ELEVATOR -> playElevator(player)
         }
     }
 
@@ -31,6 +32,14 @@ class SoundManager {
             type(BukkitSound.ENTITY_WIND_CHARGE_WIND_BURST)
             source(AdventureSound.Source.NEUTRAL)
             pitch(1.0f)
+        }
+    }
+
+    fun playElevator(player: Player) {
+        player.playSound(true) {
+            type(BukkitSound.BLOCK_PISTON_EXTEND)
+            source(AdventureSound.Source.NEUTRAL)
+            pitch(0.8f)
         }
     }
 

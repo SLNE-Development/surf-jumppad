@@ -69,6 +69,12 @@ object PlayerMoveListener : Listener {
         val velocityAdjustmentFactor = 0.5
         val acceptableError = 0.5
         val initialVelocityEstimateFactor = 0.5
+        val upwardHeightFactor = 0.5
+        val downwardHeightFactor = 0.3
+        val upwardGravityMultiplier = 2.0
+        val downwardGravityMultiplier = 0.5
+        val steepTrajectoryThreshold = 0.5
+        val steepTrajectoryAdjustment = 1.5
         
         // Use strength parameter to control the speed/time of flight
         // Higher strength = faster/shorter flight time
@@ -89,16 +95,17 @@ object PlayerMoveListener : Listener {
         // Account for height differences - going up needs more time, going down needs adjustment
         val heightAdjustmentFactor = if (dy > 0) {
             // Going up: need more time to fight gravity
-            1.0 + (kotlin.math.abs(dy) / (horizontalDistance.coerceAtLeast(1.0))) * 0.5
+            1.0 + (kotlin.math.abs(dy) / (horizontalDistance.coerceAtLeast(1.0))) * upwardHeightFactor
         } else if (dy < 0) {
             // Going down: gravity helps, but still need time
-            1.0 + (kotlin.math.abs(dy) / (horizontalDistance.coerceAtLeast(1.0))) * 0.3
+            1.0 + (kotlin.math.abs(dy) / (horizontalDistance.coerceAtLeast(1.0))) * downwardHeightFactor
         } else {
             1.0
         }
         
-        val baseMinTime = (totalDistance / (desiredSpeed * maxSpeedMultiplier * heightAdjustmentFactor)).coerceAtLeast(minFlightTime)
-        val baseMaxTime = (totalDistance / (desiredSpeed * minSpeedMultiplier * heightAdjustmentFactor)).coerceAtMost(maxFlightTime)
+        // Apply height adjustment factor by multiplying (not dividing) to increase time for height differences
+        val baseMinTime = ((totalDistance / (desiredSpeed * maxSpeedMultiplier)) * heightAdjustmentFactor).coerceAtLeast(minFlightTime)
+        val baseMaxTime = ((totalDistance / (desiredSpeed * minSpeedMultiplier)) * heightAdjustmentFactor).coerceAtMost(maxFlightTime)
         
         // Ensure minTime doesn't exceed maxTime
         val effectiveMinTime = baseMinTime.coerceAtMost(baseMaxTime)
@@ -116,10 +123,10 @@ object PlayerMoveListener : Listener {
             val gravityEffect = gravity * estimatedTicks * initialVelocityEstimateFactor
             var testVelY = if (dy > 0) {
                 // Going up: need more initial velocity
-                dy / estimatedTicks + gravityEffect * 2.0
+                dy / estimatedTicks + gravityEffect * upwardGravityMultiplier
             } else if (dy < 0) {
                 // Going down: gravity helps
-                dy / estimatedTicks + gravityEffect * 0.5
+                dy / estimatedTicks + gravityEffect * downwardGravityMultiplier
             } else {
                 // Level flight
                 gravityEffect
@@ -165,8 +172,8 @@ object PlayerMoveListener : Listener {
                 
                 // Adjust velocities based on error
                 // Use a higher adjustment factor for vertical errors when dealing with height differences
-                val verticalAdjustmentFactor = if (kotlin.math.abs(dy) > horizontalDistance * 0.5) {
-                    velocityAdjustmentFactor * 1.5 // More aggressive for steep trajectories
+                val verticalAdjustmentFactor = if (kotlin.math.abs(dy) > horizontalDistance * steepTrajectoryThreshold) {
+                    velocityAdjustmentFactor * steepTrajectoryAdjustment // More aggressive for steep trajectories
                 } else {
                     velocityAdjustmentFactor
                 }

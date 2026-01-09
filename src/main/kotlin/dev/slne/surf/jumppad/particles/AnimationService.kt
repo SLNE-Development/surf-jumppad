@@ -13,8 +13,8 @@ class AnimationService {
             JumpPadType.HORIZONTAL_NORTH -> showHorizontal(player, Vector(0, 0, -1))
             JumpPadType.HORIZONTAL_SOUTH -> showHorizontal(player, Vector(0, 0, 1))
             JumpPadType.VERTICAL -> showVertical(player)
-            else -> {}
             JumpPadType.ELEVATOR -> showElevator(player)
+            JumpPadType.STATIC -> {}
         }
     }
 

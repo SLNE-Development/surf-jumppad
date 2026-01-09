@@ -1,6 +1,10 @@
 package dev.slne.surf.jumppad.pad
 
+import dev.slne.surf.surfapi.bukkit.api.extensions.server
+import dev.slne.surf.surfapi.bukkit.api.glow.glowingApi
+import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Location
+import org.bukkit.entity.Player
 
 class JumpPadManager {
 
@@ -61,6 +65,7 @@ class JumpPadManager {
             JumpPadType.HORIZONTAL_EAST -> NamedTextColor.YELLOW
             JumpPadType.HORIZONTAL_WEST -> NamedTextColor.GREEN
             JumpPadType.ELEVATOR -> NamedTextColor.AQUA
+            JumpPadType.STATIC -> NamedTextColor.WHITE
         }
 
         for (dx in -halfWidth..halfWidth) {

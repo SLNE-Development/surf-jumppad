@@ -14,8 +14,8 @@ class SoundManager {
             JumpPadType.HORIZONTAL_NORTH -> playHorizontal(player)
             JumpPadType.HORIZONTAL_SOUTH -> playHorizontal(player)
             JumpPadType.VERTICAL -> playVertical(player)
-            else -> {}
             JumpPadType.ELEVATOR -> playElevator(player)
+            JumpPadType.STATIC -> {}
         }
     }
 

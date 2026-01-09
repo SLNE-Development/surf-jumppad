@@ -68,6 +68,7 @@ object PlayerMoveListener : Listener {
         val convergenceThreshold = 0.1
         val velocityAdjustmentFactor = 0.5
         val acceptableError = 0.5
+        val initialVelocityEstimateFactor = 0.5
         
         // Use strength parameter to control the speed/time of flight
         // Higher strength = faster/shorter flight time
@@ -87,10 +88,14 @@ object PlayerMoveListener : Listener {
         val minTime = (horizontalDistance / (desiredSpeed * maxSpeedMultiplier)).coerceAtLeast(minFlightTime)
         val maxTime = (horizontalDistance / (desiredSpeed * minSpeedMultiplier)).coerceAtMost(maxFlightTime)
         
-        for (estimatedTicks in minTime.toInt()..maxTime.toInt() step timeStepSize) {
+        // Ensure minTime doesn't exceed maxTime
+        val effectiveMinTime = minTime.coerceAtMost(maxTime)
+        val effectiveMaxTime = maxTime.coerceAtLeast(effectiveMinTime)
+        
+        for (estimatedTicks in effectiveMinTime.toInt()..effectiveMaxTime.toInt() step timeStepSize) {
             // Simulate trajectory to find required initial velocities
             var testVelX = dx / estimatedTicks
-            var testVelY = dy / estimatedTicks + gravity * estimatedTicks * 0.5
+            var testVelY = dy / estimatedTicks + gravity * estimatedTicks * initialVelocityEstimateFactor
             var testVelZ = dz / estimatedTicks
             
             // Iterate to refine the velocities

@@ -32,6 +32,7 @@ object CreateJumpPadDialog {
     private const val TYPE_KEY_HORIZONTAL_EAST = "pad_type_horizontal_east"
     private const val TYPE_KEY_HORIZONTAL_WEST = "pad_type_horizontal_west"
     private const val TYPE_KEY_VERTICAL = "pad_type_vertical"
+    private const val TYPE_KEY_ELEVATOR = "pad_type_elevator"
 
     private val locationRegex by lazy { Regex("^-?\\d+\\s-?\\d+\\s-?\\d+$") }
     private val boxRegex by lazy { Regex("^\\d+x\\d+$") }
@@ -81,6 +82,7 @@ object CreateJumpPadDialog {
                     option(TYPE_KEY_HORIZONTAL_EAST, buildText { text("Horizontal Ost") })
                     option(TYPE_KEY_HORIZONTAL_WEST, buildText { text("Horizontal West") })
                     option(TYPE_KEY_VERTICAL, buildText { text("Vertikal") })
+                    option(TYPE_KEY_ELEVATOR, buildText { text("Aufzug") })
                 }
             }
         }
@@ -127,6 +129,7 @@ object CreateJumpPadDialog {
                     TYPE_KEY_HORIZONTAL_EAST -> JumpPadType.HORIZONTAL_EAST
                     TYPE_KEY_HORIZONTAL_WEST -> JumpPadType.HORIZONTAL_WEST
                     TYPE_KEY_VERTICAL -> JumpPadType.VERTICAL
+                    TYPE_KEY_ELEVATOR -> JumpPadType.ELEVATOR
                     else -> JumpPadType.HORIZONTAL_NORTH
                 }
 

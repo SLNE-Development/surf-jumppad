@@ -68,6 +68,7 @@ class JumpPadManager {
             JumpPadType.HORIZONTAL_SOUTH -> NamedTextColor.RED
             JumpPadType.HORIZONTAL_EAST -> NamedTextColor.YELLOW
             JumpPadType.HORIZONTAL_WEST -> NamedTextColor.GREEN
+            JumpPadType.ELEVATOR -> NamedTextColor.AQUA
         }
 
         for (dx in -halfWidth..halfWidth) {

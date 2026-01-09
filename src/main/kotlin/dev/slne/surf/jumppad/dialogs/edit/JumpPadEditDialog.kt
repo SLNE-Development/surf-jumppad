@@ -181,7 +181,15 @@ object JumpPadEditDialog {
                         player.showDialog(JumpPadEditFailResultDialog.showDialog(oldPad))
                         return@customClick
                     }
-                    parseLocation(targetString, player.location.world)
+                    val parsedTarget = parseLocation(targetString, player.location.world)
+                    // Validate that target is different from origin
+                    if (parsedTarget.blockX == origin.blockX && 
+                        parsedTarget.blockY == origin.blockY && 
+                        parsedTarget.blockZ == origin.blockZ) {
+                        player.showDialog(JumpPadEditFailResultDialog.showDialog(oldPad))
+                        return@customClick
+                    }
+                    parsedTarget
                 } else {
                     null
                 }

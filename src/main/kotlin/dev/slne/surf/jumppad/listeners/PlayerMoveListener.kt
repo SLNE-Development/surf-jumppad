@@ -94,12 +94,13 @@ object PlayerMoveListener : Listener {
         // This accounts for drag reducing velocity and gravity accumulating
         for (attempt in 0..10) {
             totalVerticalDisplacement = 0.0
-            currentVelocityY = dy / dragSum + gravity * timeInTicks / 2.0 // initial estimate
+            currentVelocityY = dy / dragSum + gravity * timeInTicks * 0.5 // initial estimate
             
             var tempVelocityY = currentVelocityY
             for (tick in 0 until timeInTicks.toInt()) {
                 totalVerticalDisplacement += tempVelocityY
-                tempVelocityY = (tempVelocityY - gravity) * drag
+                // Apply drag first, then subtract gravity (Minecraft physics order)
+                tempVelocityY = tempVelocityY * drag - gravity
             }
             
             // Check if we're close enough

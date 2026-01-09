@@ -48,6 +48,7 @@ object JumpPadEditDialog {
                     plainMessage(400) {
                         info("Du konfigurierst gerade ein JumpPad.")
                         appendNewline(2)
+
                         primary("UUID: ")
                         variableValue(pad.uuid.toString())
                         appendNewline(2)
@@ -71,12 +72,9 @@ object JumpPadEditDialog {
                         variableValue(pad.strength.toString())
                         appendNewline(2)
 
-                        primary("Breite: ")
-                        variableValue(pad.width.toString())
+                        primary("Box: ")
+                        variableValue("${pad.width}x${pad.length}")
                         appendNewline(2)
-
-                        primary("Länge: ")
-                        variableValue(pad.length.toString())
                     }
                 }
                 input {
@@ -142,7 +140,7 @@ object JumpPadEditDialog {
                 val (width, length) = parseBox(boxString)
 
                 if (width > 10 || length > 10) {
-                    player.showDialog(JumpPadCreationFailResultDialog.showDialog(player))
+                    player.showDialog(JumpPadCreationFailResultDialog.showDialog())
                     return@customClick
                 }
 
@@ -168,7 +166,6 @@ object JumpPadEditDialog {
                 )
 
                 jumpPadService.updatePad(updatedPad)
-                jumpPadService.updatePadVisualization(updatedPad)
                 player.showDialog(JumpPadInfoDialog.showDialog(updatedPad))
             }
         }

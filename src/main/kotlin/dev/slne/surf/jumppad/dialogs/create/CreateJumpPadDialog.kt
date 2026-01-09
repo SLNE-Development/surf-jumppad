@@ -49,8 +49,10 @@ object CreateJumpPadDialog {
                 plainMessage(400) {
                     info("Du bist dabei ein neues JumpPad zu erstellen.")
                     appendNewline(2)
+
                     primary("UUID: ")
                     variableValue(uuid.toString())
+                    appendNewline(2)
                 }
             }
             input {
@@ -109,7 +111,7 @@ object CreateJumpPadDialog {
                 val validBox = boxRegex.matches(boxString)
 
                 if (!validLocation || !validBox) {
-                    player.showDialog(JumpPadCreationFailResultDialog.showDialog(player))
+                    player.showDialog(JumpPadCreationFailResultDialog.showDialog())
                     return@customClick
                 }
 
@@ -117,7 +119,7 @@ object CreateJumpPadDialog {
                 val (width, length) = parseBox(boxString)
 
                 if (width > 10 || length > 10) {
-                    player.showDialog(JumpPadCreationFailResultDialog.showDialog(player))
+                    player.showDialog(JumpPadCreationFailResultDialog.showDialog())
                     return@customClick
                 }
 
@@ -142,7 +144,6 @@ object CreateJumpPadDialog {
                     type = type
                 )
                 jumpPadService.addPad(pad)
-                jumpPadService.visualizePadForAll(pad)
                 player.showDialog(JumpPadCreateSuccessDialog.showDialog(pad))
             }
         }

@@ -1,10 +1,6 @@
 package dev.slne.surf.jumppad.pad
 
-import dev.slne.surf.surfapi.bukkit.api.extensions.server
-import dev.slne.surf.surfapi.bukkit.api.glow.glowingApi
-import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Location
-import org.bukkit.entity.Player
 
 class JumpPadManager {
 
@@ -13,10 +9,6 @@ class JumpPadManager {
     fun registerPad(pad: JumpPad) {
         pads.removeIf { it.uuid == pad.uuid }
         addPad(pad)
-    }
-
-    fun unregisterPad(pad: JumpPad) {
-        deletePad(pad)
     }
 
     fun addPad(pad: JumpPad) {
@@ -110,8 +102,8 @@ class JumpPadManager {
             }
         }
     }
-
-    fun getPads(): List<JumpPad> = pads.toList()
+  
+  fun getPads(): List<JumpPad> = pads.toList()
 
     companion object {
         val INSTANCE = JumpPadManager()

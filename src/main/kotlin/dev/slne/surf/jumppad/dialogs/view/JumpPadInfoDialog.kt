@@ -36,19 +36,16 @@ object JumpPadInfoDialog {
                     appendNewline(2)
 
                     primary("Welt: ")
-                    variableValue(pad.origin.world?.name.toString())
+                    variableValue(pad.origin.world?.name ?: "unbekannt")
                     appendNewline(2)
 
                     primary("Stärke: ")
-                    variableValue(pad.strength.toString())
+                    variableValue(pad.strength)
                     appendNewline(2)
 
-                    primary("Breite: ")
-                    variableValue(pad.width.toString())
+                    primary("Box: ")
+                    variableValue("${pad.width}x${pad.length}")
                     appendNewline(2)
-
-                    primary("Länge: ")
-                    variableValue(pad.length.toString())
                 }
             }
         }

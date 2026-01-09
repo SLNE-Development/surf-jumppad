@@ -5,5 +5,6 @@ enum class JumpPadType {
     HORIZONTAL_EAST,
     HORIZONTAL_SOUTH,
     HORIZONTAL_WEST,
-    VERTICAL;
+    VERTICAL,
+    STATIC;
 }

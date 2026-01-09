@@ -25,12 +25,14 @@ object JumpPadEditDialog {
     private const val STRENGTH_KEY = "pad_strength"
     private const val BOX_KEY = "pad_box"
     private const val TYPE_KEY = "pad_type"
+    private const val TARGET_KEY = "pad_target"
 
     private const val TYPE_KEY_HORIZONTAL_NORTH = "pad_type_horizontal_north"
     private const val TYPE_KEY_HORIZONTAL_SOUTH = "pad_type_horizontal_south"
     private const val TYPE_KEY_HORIZONTAL_EAST = "pad_type_horizontal_east"
     private const val TYPE_KEY_HORIZONTAL_WEST = "pad_type_horizontal_west"
     private const val TYPE_KEY_VERTICAL = "pad_type_vertical"
+    private const val TYPE_KEY_STATIC = "pad_type_static"
 
     private val locationRegex by lazy { Regex("^-?\\d+\\s-?\\d+\\s-?\\d+\$") }
     private val boxRegex by lazy { Regex("^\\d+x\\d+$") }
@@ -74,6 +76,12 @@ object JumpPadEditDialog {
                         primary("Box: ")
                         variableValue("${pad.width}x${pad.length}")
                         appendNewline(2)
+                        
+                        if (pad.target != null) {
+                            primary("Zielposition: ")
+                            variableValue("${pad.target.blockX} ${pad.target.blockY} ${pad.target.blockZ}")
+                            appendNewline(2)
+                        }
                     }
                 }
                 input {
@@ -106,6 +114,18 @@ object JumpPadEditDialog {
                         option(TYPE_KEY_HORIZONTAL_EAST, buildText { text("Horizontal Ost") })
                         option(TYPE_KEY_HORIZONTAL_WEST, buildText { text("Horizontal West") })
                         option(TYPE_KEY_VERTICAL, buildText { text("Vertikal") })
+                        option(TYPE_KEY_STATIC, buildText { text("Statisch (Zielposition)") })
+                    }
+                }
+                input {
+                    text(TARGET_KEY) {
+                        label { text("Zielposition (nur für Statisch)") }
+                        initial(if (pad.target != null) {
+                            "${pad.target.blockX} ${pad.target.blockY} ${pad.target.blockZ}"
+                        } else {
+                            "${pad.origin.blockX + 10} ${pad.origin.blockY + 5} ${pad.origin.blockZ + 10}"
+                        })
+                        width(400)
                     }
                 }
             }
@@ -126,6 +146,7 @@ object JumpPadEditDialog {
                 val locationString = content.getText(LOCATION_KEY) ?: ""
                 val strengthFloat = content.getFloat(STRENGTH_KEY) ?: 0.0f
                 val boxString = content.getText(BOX_KEY) ?: ""
+                val targetString = content.getText(TARGET_KEY) ?: ""
 
                 val validLocation = locationRegex.matches(locationString)
                 val validBox = boxRegex.matches(boxString)
@@ -150,7 +171,15 @@ object JumpPadEditDialog {
                     TYPE_KEY_HORIZONTAL_SOUTH -> JumpPadType.HORIZONTAL_SOUTH
                     TYPE_KEY_HORIZONTAL_EAST -> JumpPadType.HORIZONTAL_EAST
                     TYPE_KEY_HORIZONTAL_WEST -> JumpPadType.HORIZONTAL_WEST
+                    TYPE_KEY_STATIC -> JumpPadType.STATIC
                     else -> oldPad.type
+                }
+                
+                // Parse target location if STATIC type
+                val target = if (type == JumpPadType.STATIC && locationRegex.matches(targetString)) {
+                    parseLocation(targetString, player.location.world)
+                } else {
+                    null
                 }
 
                 val updatedPad = oldPad.copy(
@@ -159,7 +188,8 @@ object JumpPadEditDialog {
                     strength = strength,
                     width = width,
                     length = length,
-                    type = type
+                    type = type,
+                    target = target
                 )
 
                 jumpPadService.updatePad(updatedPad)

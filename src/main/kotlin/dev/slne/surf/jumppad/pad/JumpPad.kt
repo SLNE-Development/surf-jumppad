@@ -9,5 +9,6 @@ data class JumpPad(
     val type: JumpPadType,
     val strength: Double,
     val width: Int,
-    val length: Int
+    val length: Int,
+    val target: Location? = null
 )

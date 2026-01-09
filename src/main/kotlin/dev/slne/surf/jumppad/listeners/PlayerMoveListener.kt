@@ -1,5 +1,6 @@
 package dev.slne.surf.jumppad.listeners
 
+import dev.slne.surf.jumppad.pad.JumpPad
 import dev.slne.surf.jumppad.pad.JumpPadType
 import dev.slne.surf.jumppad.pad.jumpPadService
 import dev.slne.surf.jumppad.particles.animationService

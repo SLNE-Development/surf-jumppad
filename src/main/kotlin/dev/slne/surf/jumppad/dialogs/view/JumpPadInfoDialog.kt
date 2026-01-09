@@ -46,6 +46,12 @@ object JumpPadInfoDialog {
                     primary("Box: ")
                     variableValue("${pad.width}x${pad.length}")
                     appendNewline(2)
+                    
+                    if (pad.target != null) {
+                        primary("Zielposition: ")
+                        variableValue("${pad.target.blockX} ${pad.target.blockY} ${pad.target.blockZ}")
+                        appendNewline(2)
+                    }
                 }
             }
         }

@@ -159,7 +159,7 @@ object JumpPadEditDialog {
                 val (width, length) = parseBox(boxString)
 
                 if (width > 10 || length > 10) {
-                    player.showDialog(JumpPadCreationFailResultDialog.showDialog())
+                    player.showDialog(JumpPadEditFailResultDialog.showDialog(oldPad))
                     return@customClick
                 }
 

@@ -58,9 +58,20 @@ object PlayerMoveListener : Listener {
         val gravity = 0.08
         val drag = 0.98
         
+        // Trajectory calculation parameters
+        val minSpeedMultiplier = 0.5
+        val maxSpeedMultiplier = 2.0
+        val minFlightTime = 10.0
+        val maxFlightTime = 200.0
+        val timeStepSize = 5
+        val maxIterations = 20
+        val convergenceThreshold = 0.1
+        val velocityAdjustmentFactor = 0.5
+        val acceptableError = 0.5
+        
         // Use strength parameter to control the speed/time of flight
         // Higher strength = faster/shorter flight time
-        val desiredSpeed = pad.strength.coerceAtLeast(0.5)
+        val desiredSpeed = pad.strength.coerceAtLeast(minSpeedMultiplier)
         
         // Calculate horizontal distance
         val horizontalDistance = kotlin.math.sqrt(dx * dx + dz * dz)
@@ -73,17 +84,17 @@ object PlayerMoveListener : Listener {
         var bestError = Double.MAX_VALUE
         
         // Try different flight times to find the best trajectory
-        val minTime = (horizontalDistance / (desiredSpeed * 2.0)).coerceAtLeast(10.0)
-        val maxTime = (horizontalDistance / (desiredSpeed * 0.5)).coerceAtMost(200.0)
+        val minTime = (horizontalDistance / (desiredSpeed * maxSpeedMultiplier)).coerceAtLeast(minFlightTime)
+        val maxTime = (horizontalDistance / (desiredSpeed * minSpeedMultiplier)).coerceAtMost(maxFlightTime)
         
-        for (estimatedTicks in minTime.toInt()..maxTime.toInt() step 5) {
+        for (estimatedTicks in minTime.toInt()..maxTime.toInt() step timeStepSize) {
             // Simulate trajectory to find required initial velocities
             var testVelX = dx / estimatedTicks
             var testVelY = dy / estimatedTicks + gravity * estimatedTicks * 0.5
             var testVelZ = dz / estimatedTicks
             
             // Iterate to refine the velocities
-            for (iteration in 0..20) {
+            for (iteration in 0..maxIterations) {
                 var simX = 0.0
                 var simY = 0.0
                 var simZ = 0.0
@@ -118,17 +129,16 @@ object PlayerMoveListener : Listener {
                 }
                 
                 // If we're close enough, stop iterating
-                if (totalError < 0.1) break
+                if (totalError < convergenceThreshold) break
                 
                 // Adjust velocities based on error
-                val adjustmentFactor = 0.5
-                testVelX += errorX / estimatedTicks * adjustmentFactor
-                testVelY += errorY / estimatedTicks * adjustmentFactor
-                testVelZ += errorZ / estimatedTicks * adjustmentFactor
+                testVelX += errorX / estimatedTicks * velocityAdjustmentFactor
+                testVelY += errorY / estimatedTicks * velocityAdjustmentFactor
+                testVelZ += errorZ / estimatedTicks * velocityAdjustmentFactor
             }
             
             // If we found a good enough solution, use it
-            if (bestError < 0.5) break
+            if (bestError < acceptableError) break
         }
         
         return Vector(bestVelocityX, bestVelocityY, bestVelocityZ)

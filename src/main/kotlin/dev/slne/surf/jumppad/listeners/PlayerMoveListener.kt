@@ -74,8 +74,9 @@ object PlayerMoveListener : Listener {
         // Higher strength = faster/shorter flight time
         val desiredSpeed = pad.strength.coerceAtLeast(minSpeedMultiplier)
         
-        // Calculate horizontal distance
+        // Calculate horizontal and total distance
         val horizontalDistance = kotlin.math.sqrt(dx * dx + dz * dz)
+        val totalDistance = kotlin.math.sqrt(dx * dx + dy * dy + dz * dz)
         
         // Estimate flight time: we want to reach the target in reasonable time
         // Start with an estimate based on desired speed
@@ -85,18 +86,44 @@ object PlayerMoveListener : Listener {
         var bestError = Double.MAX_VALUE
         
         // Try different flight times to find the best trajectory
-        val minTime = (horizontalDistance / (desiredSpeed * maxSpeedMultiplier)).coerceAtLeast(minFlightTime)
-        val maxTime = (horizontalDistance / (desiredSpeed * minSpeedMultiplier)).coerceAtMost(maxFlightTime)
+        // Account for height differences - going up needs more time, going down needs adjustment
+        val heightAdjustmentFactor = if (dy > 0) {
+            // Going up: need more time to fight gravity
+            1.0 + (kotlin.math.abs(dy) / (horizontalDistance.coerceAtLeast(1.0))) * 0.5
+        } else if (dy < 0) {
+            // Going down: gravity helps, but still need time
+            1.0 + (kotlin.math.abs(dy) / (horizontalDistance.coerceAtLeast(1.0))) * 0.3
+        } else {
+            1.0
+        }
+        
+        val baseMinTime = (totalDistance / (desiredSpeed * maxSpeedMultiplier * heightAdjustmentFactor)).coerceAtLeast(minFlightTime)
+        val baseMaxTime = (totalDistance / (desiredSpeed * minSpeedMultiplier * heightAdjustmentFactor)).coerceAtMost(maxFlightTime)
         
         // Ensure minTime doesn't exceed maxTime
-        val effectiveMinTime = minTime.coerceAtMost(maxTime)
-        val effectiveMaxTime = maxTime.coerceAtLeast(effectiveMinTime)
+        val effectiveMinTime = baseMinTime.coerceAtMost(baseMaxTime)
+        val effectiveMaxTime = baseMaxTime.coerceAtLeast(effectiveMinTime)
         
         for (estimatedTicks in effectiveMinTime.toInt()..effectiveMaxTime.toInt() step timeStepSize) {
             // Simulate trajectory to find required initial velocities
+            // Better initial estimate considering height difference
             var testVelX = dx / estimatedTicks
-            var testVelY = dy / estimatedTicks + gravity * estimatedTicks * initialVelocityEstimateFactor
             var testVelZ = dz / estimatedTicks
+            
+            // For vertical velocity, we need to account for gravity over the flight time
+            // If going up, we need extra velocity to overcome gravity
+            // If going down, gravity assists but we still need careful calculation
+            val gravityEffect = gravity * estimatedTicks * initialVelocityEstimateFactor
+            var testVelY = if (dy > 0) {
+                // Going up: need more initial velocity
+                dy / estimatedTicks + gravityEffect * 2.0
+            } else if (dy < 0) {
+                // Going down: gravity helps
+                dy / estimatedTicks + gravityEffect * 0.5
+            } else {
+                // Level flight
+                gravityEffect
+            }
             
             // Iterate to refine the velocities
             for (iteration in 0..maxIterations) {
@@ -137,8 +164,15 @@ object PlayerMoveListener : Listener {
                 if (totalError < convergenceThreshold) break
                 
                 // Adjust velocities based on error
+                // Use a higher adjustment factor for vertical errors when dealing with height differences
+                val verticalAdjustmentFactor = if (kotlin.math.abs(dy) > horizontalDistance * 0.5) {
+                    velocityAdjustmentFactor * 1.5 // More aggressive for steep trajectories
+                } else {
+                    velocityAdjustmentFactor
+                }
+                
                 testVelX += errorX / estimatedTicks * velocityAdjustmentFactor
-                testVelY += errorY / estimatedTicks * velocityAdjustmentFactor
+                testVelY += errorY / estimatedTicks * verticalAdjustmentFactor
                 testVelZ += errorZ / estimatedTicks * velocityAdjustmentFactor
             }
             

@@ -10,7 +10,9 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.util.Vector
+import java.lang.Math.pow
 import java.util.*
+import kotlin.math.pow
 import kotlin.time.Duration.Companion.seconds
 
 object PlayerMoveListener : Listener {
@@ -76,7 +78,7 @@ object PlayerMoveListener : Listener {
         // Total distance = sum of (v0 * drag^t) for t=0 to timeInTicks
         // This approximates to: v0 * (1 - drag^time) / (1 - drag)
         val dragSum = if (drag < 1.0) {
-            (1 - kotlin.math.pow(drag, timeInTicks)) / (1 - drag)
+            (1 - drag.pow(timeInTicks)) / (1 - drag)
         } else {
             timeInTicks // fallback if drag is 1.0
         }

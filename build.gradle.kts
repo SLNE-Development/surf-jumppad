@@ -9,3 +9,6 @@ surfPaperPluginApi {
 
     generateLibraryLoader(false)
 }
+
+version = findProperty("version") as String
+group = "dev.slne.surf.jumppad"

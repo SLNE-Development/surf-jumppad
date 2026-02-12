@@ -5,6 +5,7 @@ import com.github.shynixn.mccoroutine.folia.launch
 import com.github.shynixn.mccoroutine.folia.ticks
 import dev.slne.surf.jumppad.plugin
 import kotlinx.coroutines.*
+import org.bukkit.GameMode
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
@@ -23,6 +24,7 @@ object JumpPadBoostService {
     ) {
         val start = player.location
         if (start.world != target.world) return
+        if(player.gameMode == GameMode.SPECTATOR) return
 
         activeBoosts[player]?.cancel()
 
@@ -63,7 +65,7 @@ object JumpPadBoostService {
         val totalTicks = (targetDist * 1.5 + 15).toInt().coerceIn(20, 100)
 
         var tick = 0
-        while (currentCoroutineContext().isActive && tick < totalTicks && player.isOnline && !player.isDead) {
+        while (currentCoroutineContext().isActive && tick < totalTicks && player.isOnline && !player.isDead && player.gameMode != GameMode.SPECTATOR) {
             val progress = tick.toDouble() / totalTicks
             val nextProgress = (tick + 1).toDouble() / totalTicks
 

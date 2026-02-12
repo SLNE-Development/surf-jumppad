@@ -35,12 +35,12 @@ class StorageService {
                 val typeString = config.getString("pad.data.type") ?: error("Type missing in ${path.fileName}")
                 val type = JumpPadType.valueOf(typeString.uppercase())
 
-                val strength = config.getInt("pad.data.strength")
+                val distance = config.getInt("pad.data.distance")
 
                 val width = config.getInt("pad.data.width")
                 val length = config.getInt("pad.data.length")
 
-                val pad = JumpPad(uuid, origin, type, strength, width, length)
+                val pad = JumpPad(uuid, origin, type, distance, width, length)
                 jumpPadService.registerPad(pad)
                 loadedCount++
             }.onFailure {
@@ -51,9 +51,7 @@ class StorageService {
     }
 
     fun savePads() {
-        Files.list(jumpPadFolder)
-            .filter { it.toString().endsWith(".yml") }
-            .forEach(Files::delete)
+        Files.list(jumpPadFolder).filter { it.toString().endsWith(".yml") }.forEach(Files::delete)
 
         val pads = jumpPadService.getPads()
 
@@ -64,7 +62,7 @@ class StorageService {
             config["pad.data.uuid"] = pad.uuid.toString()
             config["pad.data.origin"] = pad.origin
             config["pad.data.type"] = pad.type.name
-            config["pad.data.strength"] = pad.distance
+            config["pad.data.distance"] = pad.distance
             config["pad.data.width"] = pad.width
             config["pad.data.length"] = pad.length
 

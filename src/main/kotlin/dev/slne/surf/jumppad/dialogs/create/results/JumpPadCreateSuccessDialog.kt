@@ -33,7 +33,7 @@ object JumpPadCreateSuccessDialog {
         }
 
         type {
-            confirmation(backButton(), teleportButton(pad))
+            confirmation(teleportButton(pad), backButton())
         }
     }
 

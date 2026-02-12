@@ -31,41 +31,32 @@ object JumpPadEditDialog {
         base {
             title {
                 primary("JUMPPAD ".toSmallCaps())
-                primary("LISTE ".toSmallCaps())
-                success("KONFIGURIEREN ".toSmallCaps())
-                variableValue("${pad.origin.blockX} ${pad.origin.blockY} ${pad.origin.blockZ} ")
+                success("EDITIEREN ".toSmallCaps())
+                variableValue("${pad.origin.blockX} ${pad.origin.blockY} ${pad.origin.blockZ}")
 
                 body {
-                    plainMessage(400) {
-                        info("Du konfigurierst gerade ein JumpPad.")
+                    plainMessage(450) {
+                        info("Du bearbeitest das JumpPad:")
+                        variableValue(" ${pad.uuid}")
                         appendNewline(2)
 
-                        primary("UUID: ")
-                        variableValue(pad.uuid.toString())
-                        appendNewline(2)
-
-                        info("Im Folgenden siehst du die aktuellen Werte des JumpPads.")
-                        appendNewline(2)
-
-                        primary("Typ: ")
+                        primary("• Typ: ")
                         append(pad.type.displayComponent)
-                        appendNewline(2)
+                        appendNewline()
 
-                        primary("Position: ")
-                        variableValue("${pad.origin.blockX} ${pad.origin.blockY} ${pad.origin.blockZ} ")
-                        appendNewline(2)
-
-                        primary("Welt: ")
+                        primary("• Welt: ")
                         variableValue(pad.origin.world?.name ?: "Unbekannt")
-                        appendNewline(2)
+                        appendNewline()
 
-                        primary("Stärke: ")
-                        variableValue(pad.distance.toString())
-                        appendNewline(2)
+                        primary("• Power: ")
+                        variableValue("${pad.distance} Blöcke")
+                        appendNewline()
 
-                        primary("Box: ")
+                        primary("• Area: ")
                         variableValue("${pad.width}x${pad.length}")
                         appendNewline(2)
+
+                        info("Passe die Werte über die unteren Felder an.")
                     }
                 }
 
@@ -76,6 +67,7 @@ object JumpPadEditDialog {
                         width(400)
                     }
                 }
+
                 input {
                     text(BOX_KEY) {
                         label { text("Box (max. 10x10)") }
@@ -83,6 +75,7 @@ object JumpPadEditDialog {
                         width(400)
                     }
                 }
+
                 input {
                     numberRange(STRENGTH_KEY, 1.0..200.0) {
                         label { text("Stärke") }
@@ -91,6 +84,7 @@ object JumpPadEditDialog {
                         width(400)
                     }
                 }
+
                 input {
                     singleOption(TYPE_KEY) {
                         label { text("JumpPad-Typ") }

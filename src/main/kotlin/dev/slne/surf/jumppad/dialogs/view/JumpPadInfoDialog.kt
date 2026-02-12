@@ -28,7 +28,7 @@ object JumpPadInfoDialog {
                     appendNewline(2)
 
                     primary("Typ: ")
-                    variableValue(pad.type.name)
+                    append(pad.type.displayComponent)
                     appendNewline(2)
 
                     primary("Position: ")

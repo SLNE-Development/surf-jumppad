@@ -35,7 +35,7 @@ object JumpPadListDialog {
                     }
                 }
                 type {
-                    confirmation(backButton(), createButton())
+                    confirmation(createButton(), backButton())
                 }
             }
         }
@@ -49,46 +49,26 @@ object JumpPadListDialog {
 
                 body {
                     plainMessage(400) {
-                        info("Aktuell existieren ")
+                        info("Aktuell existieren insgesamt ")
                         variableValue(pads.size)
                         info(" JumpPads.")
                         appendNewline(2)
 
-                        spacer("- ")
-                        info("Horizontal: ")
-                        variableValue(
-                            pads.count {
-                                it.type == JumpPadType.HORIZONTAL_NORTH ||
-                                        it.type == JumpPadType.HORIZONTAL_SOUTH ||
-                                        it.type == JumpPadType.HORIZONTAL_EAST ||
-                                        it.type == JumpPadType.HORIZONTAL_WEST
+                        primary("Statistik nach Typen:")
+                        appendNewline()
+
+                        val padsByType = pads.groupBy { it.type }
+
+                        JumpPadType.entries.forEach { type ->
+                            val count = padsByType[type]?.size ?: 0
+                            if (count > 0) {
+                                spacer(" - ")
+                                append(type.displayComponent)
+                                info(": ")
+                                variableValue(count)
+                                appendNewline()
                             }
-                        )
-                        appendNewline()
-
-                        spacer("   • ")
-                        info("Nord: ")
-                        variableValue(pads.count { it.type == JumpPadType.HORIZONTAL_NORTH })
-                        appendNewline()
-
-                        spacer("   • ")
-                        info("Süd: ")
-                        variableValue(pads.count { it.type == JumpPadType.HORIZONTAL_SOUTH })
-                        appendNewline()
-
-                        spacer("   • ")
-                        info("Ost: ")
-                        variableValue(pads.count { it.type == JumpPadType.HORIZONTAL_EAST })
-                        appendNewline()
-
-                        spacer("   • ")
-                        info("West: ")
-                        variableValue(pads.count { it.type == JumpPadType.HORIZONTAL_WEST })
-                        appendNewline(2)
-
-                        spacer("- ")
-                        info("Vertikal: ")
-                        variableValue(pads.count { it.type == JumpPadType.VERTICAL })
+                        }
                     }
 
                 }

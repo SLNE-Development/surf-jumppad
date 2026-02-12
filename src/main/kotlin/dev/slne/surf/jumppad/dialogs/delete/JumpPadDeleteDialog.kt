@@ -5,6 +5,7 @@ package dev.slne.surf.jumppad.dialogs.delete
 import dev.slne.surf.jumppad.dialogs.view.JumpPadInfoDialog
 import dev.slne.surf.jumppad.dialogs.view.JumpPadListDialog
 import dev.slne.surf.jumppad.pad.JumpPad
+import dev.slne.surf.jumppad.pad.JumpPadType
 import dev.slne.surf.jumppad.pad.service.jumpPadService
 import dev.slne.surf.surfapi.bukkit.api.dialog.base
 import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
@@ -43,20 +44,31 @@ object JumpPadDeleteDialog {
                         appendNewline(2)
 
                         primary("Typ: ")
-                        variableValue(pad.type.name)
+                        append(pad.type.displayComponent)
                         appendNewline(2)
 
                         primary("Position: ")
-                        variableValue("${pad.origin.blockX} ${pad.origin.blockY} ${pad.origin.blockZ} ")
+                        variableValue("${pad.origin.blockX} ${pad.origin.blockY} ${pad.origin.blockZ}")
                         appendNewline(2)
 
                         primary("Welt: ")
                         variableValue(pad.origin.world?.name ?: "Unbekannt")
                         appendNewline(2)
 
-                        primary("Stärke: ")
-                        variableValue(pad.distance)
-                        appendNewline(2)
+                        if (pad.type == JumpPadType.STATIC) {
+                            primary("Ziel: ")
+                            val target = pad.targetLocation
+                            if (target != null) {
+                                variableValue("${target.blockX} ${target.blockY} ${target.blockZ}")
+                            } else {
+                                variableValue("Nicht gesetzt")
+                            }
+                            appendNewline(2)
+                        } else {
+                            primary("Stärke: ")
+                            variableValue(pad.distance)
+                            appendNewline(2)
+                        }
 
                         primary("Box: ")
                         variableValue("${pad.width}x${pad.length}")

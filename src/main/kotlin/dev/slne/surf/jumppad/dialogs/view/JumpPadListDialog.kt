@@ -3,7 +3,7 @@
 package dev.slne.surf.jumppad.dialogs.view
 
 import dev.slne.surf.jumppad.dialogs.JumpPadMainDialog
-import dev.slne.surf.jumppad.dialogs.create.CreateJumpPadDialog
+import dev.slne.surf.jumppad.dialogs.create.DecideForTypeDialog
 import dev.slne.surf.jumppad.pad.JumpPad
 import dev.slne.surf.jumppad.pad.JumpPadType
 import dev.slne.surf.jumppad.pad.service.jumpPadService
@@ -15,7 +15,6 @@ import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import dev.slne.surf.surfapi.core.api.messages.adventure.appendNewline
 import dev.slne.surf.surfapi.core.api.util.toObjectSet
 import io.papermc.paper.dialog.Dialog
-import io.papermc.paper.registry.data.dialog.DialogBase
 
 object JumpPadListDialog {
     fun showDialog(): Dialog {
@@ -45,7 +44,6 @@ object JumpPadListDialog {
                 title {
                     primary("JUMPPAD LISTE".toSmallCaps())
                 }
-                afterAction(DialogBase.DialogAfterAction.WAIT_FOR_RESPONSE)
 
                 body {
                     plainMessage(400) {
@@ -58,7 +56,6 @@ object JumpPadListDialog {
                         appendNewline()
 
                         val padsByType = pads.groupBy { it.type }
-
                         JumpPadType.entries.forEach { type ->
                             val count = padsByType[type]?.size ?: 0
                             if (count > 0) {
@@ -69,8 +66,9 @@ object JumpPadListDialog {
                                 appendNewline()
                             }
                         }
+                        appendNewline()
+                        info("Klicke auf ein JumpPad, um Details zu sehen.")
                     }
-
                 }
             }
 
@@ -103,7 +101,7 @@ object JumpPadListDialog {
         tooltip { info("Klicke hier, um ein JumpPad zu erstellen.") }
         action {
             playerCallback {
-                it.showDialog(CreateJumpPadDialog.showDialog(it))
+                it.showDialog(DecideForTypeDialog.showDialog())
             }
         }
     }

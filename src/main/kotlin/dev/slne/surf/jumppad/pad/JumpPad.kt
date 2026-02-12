@@ -8,6 +8,7 @@ data class JumpPad(
     val origin: Location,
     val type: JumpPadType,
     val distance: Int,
+    val targetLocation: Location? = null,
     val width: Int,
     val length: Int
 )

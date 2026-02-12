@@ -2,7 +2,7 @@
 
 package dev.slne.surf.jumppad.dialogs
 
-import dev.slne.surf.jumppad.dialogs.create.CreateJumpPadDialog
+import dev.slne.surf.jumppad.dialogs.create.DecideForTypeDialog
 import dev.slne.surf.jumppad.dialogs.view.JumpPadListDialog
 import dev.slne.surf.jumppad.pad.JumpPadType
 import dev.slne.surf.jumppad.pad.service.jumpPadService
@@ -18,34 +18,40 @@ object JumpPadMainDialog {
     fun showDialog() = dialog {
         base {
             val pads = jumpPadService.getPads()
-            title { primary("JUMPPAD".toSmallCaps()) }
-
+            title {
+                primary("JUMPPAD ".toSmallCaps())
+                success("VERWALTUNG".toSmallCaps())
+            }
             body {
                 plainMessage(400) {
+                    info("Willkommen in der JumpPad-Verwaltung.")
+                    appendNewline(2)
+
                     info("Aktuell existieren insgesamt ")
                     variableValue(pads.size)
                     info(" JumpPads.")
                     appendNewline(2)
 
-                    primary("Statistik nach Typen:")
-                    appendNewline()
+                    if (pads.isNotEmpty()) {
+                        primary("Statistik nach Typen:")
+                        appendNewline()
 
-                    val padsByType = pads.groupBy { it.type }
-
-                    JumpPadType.entries.forEach { type ->
-                        val count = padsByType[type]?.size ?: 0
-                        if (count > 0) {
-                            spacer(" - ")
-                            append(type.displayComponent)
-                            info(": ")
-                            variableValue(count)
-                            appendNewline()
+                        val padsByType = pads.groupBy { it.type }
+                        JumpPadType.entries.forEach { type ->
+                            val count = padsByType[type]?.size ?: 0
+                            if (count > 0) {
+                                spacer(" - ")
+                                append(type.displayComponent)
+                                info(": ")
+                                variableValue(count)
+                                appendNewline()
+                            }
                         }
+                    } else {
+                        error("Es wurden noch keine JumpPads erstellt.")
                     }
                 }
-
             }
-
         }
 
         type {
@@ -60,11 +66,11 @@ object JumpPadMainDialog {
     private fun createPadButton(): ActionButton = actionButton {
         label { success("JumPad erstellen") }
         tooltip {
-            info("Klicke hier, ein JumPad zu erstellen.")
+            info("Klicke hier, um ein neues JumpPad zu erstellen.")
         }
         action {
             playerCallback {
-                it.showDialog(CreateJumpPadDialog.showDialog(it))
+                it.showDialog(DecideForTypeDialog.showDialog())
             }
         }
     }
@@ -72,7 +78,7 @@ object JumpPadMainDialog {
     internal fun showPadsButton(): ActionButton = actionButton {
         label { primary("JumPad ansehen") }
         tooltip {
-            info("Klicke hier, die existierenden JumPads anzusehen.")
+            info("Klicke hier, um die Liste aller existierenden JumpPads zu öffnen.")
         }
         action {
             playerCallback {
@@ -84,7 +90,7 @@ object JumpPadMainDialog {
     private fun exitButton(): ActionButton = actionButton {
         label { spacer("Schließen") }
         tooltip {
-            info("Klicke hier, um den Vorgang abzubrechen.")
+            info("Klicke hier, um das Menü zu verlassen.")
         }
         action {
             playerCallback {

@@ -5,6 +5,7 @@ package dev.slne.surf.jumppad.dialogs.view
 import dev.slne.surf.jumppad.dialogs.delete.JumpPadDeleteDialog
 import dev.slne.surf.jumppad.dialogs.edit.JumpPadEditDialog
 import dev.slne.surf.jumppad.pad.JumpPad
+import dev.slne.surf.jumppad.pad.JumpPadType
 import dev.slne.surf.surfapi.bukkit.api.dialog.base
 import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
 import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
@@ -19,31 +20,39 @@ object JumpPadInfoDialog {
                 variableValue("${pad.origin.blockX} ${pad.origin.blockY} ${pad.origin.blockZ}")
             }
             body {
-                plainMessage(300) {
-                    info("Alle relevanten Informationen zum JumpPad siehst du im Folgenden.")
-                    appendNewline(4)
+                plainMessage(350) {
+                    info("Informationen zum JumpPad am Standort:")
+                    appendNewline()
+                    variableValue("${pad.origin.blockX} ${pad.origin.blockY} ${pad.origin.blockZ}")
+                    appendNewline(2)
 
                     primary("UUID: ")
                     variableValue(pad.uuid.toString())
-                    appendNewline(2)
+                    appendNewline()
 
                     primary("Typ: ")
                     append(pad.type.displayComponent)
-                    appendNewline(2)
-
-                    primary("Position: ")
-                    variableValue("${pad.origin.blockX} ${pad.origin.blockY} ${pad.origin.blockZ} ")
-                    appendNewline(2)
+                    appendNewline()
 
                     primary("Welt: ")
                     variableValue(pad.origin.world?.name ?: "unbekannt")
-                    appendNewline(2)
+                    appendNewline()
 
-                    primary("Stärke: ")
-                    variableValue(pad.distance)
-                    appendNewline(2)
+                    if (pad.type == JumpPadType.STATIC) {
+                        primary("Ziel: ")
+                        val target = pad.targetLocation
+                        if (target != null) {
+                            variableValue("${target.blockX} ${target.blockY} ${target.blockZ}")
+                        } else {
+                            error("Nicht konfiguriert")
+                        }
+                    } else {
+                        primary("Stärke: ")
+                        variableValue("${pad.distance} Blöcke")
+                    }
+                    appendNewline()
 
-                    primary("Box: ")
+                    primary("Bereich: ")
                     variableValue("${pad.width}x${pad.length}")
                     appendNewline(2)
                 }

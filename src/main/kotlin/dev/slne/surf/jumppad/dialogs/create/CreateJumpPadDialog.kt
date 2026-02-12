@@ -24,12 +24,12 @@ object CreateJumpPadDialog {
     private const val LOCATION_KEY = "pad_location"
     private const val STRENGTH_KEY = "pad_strength"
     private const val BOX_KEY = "pad_box"
-    private const val TYPE_KEY = "pad_type"
+    private const val TARGET_LOCATION_KEY = "pad_target_location"
 
     private val locationRegex by lazy { Regex("^-?\\d+\\s-?\\d+\\s-?\\d+$") }
     private val boxRegex by lazy { Regex("^\\d+x\\d+$") }
 
-    fun showDialog(player: Player) = dialog {
+    fun showDialog(player: Player, type: JumpPadType) = dialog {
         val uuid = UUID.randomUUID()
         base {
             title {
@@ -61,45 +61,40 @@ object CreateJumpPadDialog {
                     width(400)
                 }
             }
-            input {
-                numberRange(STRENGTH_KEY, 1.0..200.0) {
-                    label { text("Stärke (Blöcke)") }
-                    step(1.toFloat())
-                    width(400)
+            if (type == JumpPadType.STATIC) {
+                input {
+                    text(TARGET_LOCATION_KEY) {
+                        label { text("Location") }
+                        initial("X Y Z")
+                        width(400)
+                    }
                 }
-            }
-            input {
-                singleOption(TYPE_KEY) {
-                    label { text("JumpPad-Typ") }
-
-                    JumpPadType.entries.forEach { type ->
-                        option(type.name, type.displayComponent)
+            } else {
+                input {
+                    numberRange(STRENGTH_KEY, 1.0..200.0) {
+                        label { text("Stärke (Blöcke)") }
+                        step(1.toFloat())
+                        width(400)
                     }
                 }
             }
         }
 
         type {
-            confirmation(createButton(uuid), backButton())
+            confirmation(createButton(uuid, type), backButton())
         }
     }
 
-    private fun createButton(uuid: UUID): ActionButton = actionButton {
+    private fun createButton(uuid: UUID, type: JumpPadType): ActionButton = actionButton {
         label { success("JumpPad erstellen") }
-        tooltip {
-            info("Klicke hier, um das JumpPad zu erstellen.")
-        }
+        tooltip { info("Klicke hier, um das JumpPad zu erstellen.") }
+
         action {
             customPlayerClick { content, player ->
-
                 val locationString = content.getText(LOCATION_KEY) ?: ""
-                val strengthFloat = content.getFloat(STRENGTH_KEY) ?: 0.0f
                 val boxString = content.getText(BOX_KEY) ?: ""
 
-                val validLocation = locationRegex.matches(locationString)
-                val validBox = boxRegex.matches(boxString)
-
-                if (!validLocation || !validBox) {
+                if (!locationRegex.matches(locationString) || !boxRegex.matches(boxString)) {
                     player.showDialog(JumpPadCreationFailResultDialog.showDialog())
                     return@customPlayerClick
                 }
@@ -112,14 +107,18 @@ object CreateJumpPadDialog {
                     return@customPlayerClick
                 }
 
-                val strength = strengthFloat.toInt()
+                var targetLoc: Location? = null
+                var strength = 0
 
-                val typeString = content.getText(TYPE_KEY)
-                val type = try {
-                    if (typeString != null) JumpPadType.valueOf(typeString)
-                    else JumpPadType.HORIZONTAL_NORTH
-                } catch (e: IllegalArgumentException) {
-                    JumpPadType.HORIZONTAL_NORTH
+                if (type == JumpPadType.STATIC) {
+                    val targetStr = content.getText(TARGET_LOCATION_KEY) ?: ""
+                    if (!locationRegex.matches(targetStr)) {
+                        player.showDialog(JumpPadCreationFailResultDialog.showDialog())
+                        return@customPlayerClick
+                    }
+                    targetLoc = parseLocation(targetStr, player.location.world)
+                } else {
+                    strength = content.getFloat(STRENGTH_KEY)?.toInt() ?: 10
                 }
 
                 val pad = JumpPad(
@@ -128,8 +127,10 @@ object CreateJumpPadDialog {
                     distance = strength,
                     width = width,
                     length = length,
-                    type = type
+                    type = type,
+                    targetLocation = targetLoc
                 )
+
                 jumpPadService.addPad(pad)
                 player.showDialog(JumpPadCreateSuccessDialog.showDialog(pad))
             }

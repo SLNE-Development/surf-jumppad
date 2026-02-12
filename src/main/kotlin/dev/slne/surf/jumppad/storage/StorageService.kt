@@ -36,11 +36,12 @@ class StorageService {
                 val type = JumpPadType.valueOf(typeString.uppercase())
 
                 val distance = config.getInt("pad.data.distance")
+                val targetLocation = config.getLocation("pad.data.targetLocation")
 
                 val width = config.getInt("pad.data.width")
                 val length = config.getInt("pad.data.length")
 
-                val pad = JumpPad(uuid, origin, type, distance, width, length)
+                val pad = JumpPad(uuid, origin, type, distance, targetLocation, width, length)
                 jumpPadService.registerPad(pad)
                 loadedCount++
             }.onFailure {
@@ -63,6 +64,7 @@ class StorageService {
             config["pad.data.origin"] = pad.origin
             config["pad.data.type"] = pad.type.name
             config["pad.data.distance"] = pad.distance
+            pad.targetLocation?.let { config["pad.data.targetLocation"] = it }
             config["pad.data.width"] = pad.width
             config["pad.data.length"] = pad.length
 

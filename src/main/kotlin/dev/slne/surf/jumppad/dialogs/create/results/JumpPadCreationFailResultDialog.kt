@@ -2,7 +2,7 @@
 
 package dev.slne.surf.jumppad.dialogs.create.results
 
-import dev.slne.surf.jumppad.dialogs.create.CreateJumpPadDialog
+import dev.slne.surf.jumppad.dialogs.create.DecideForTypeDialog
 import dev.slne.surf.surfapi.bukkit.api.dialog.base
 import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
 import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
@@ -46,7 +46,7 @@ object JumpPadCreationFailResultDialog {
         }
         action {
             playerCallback {
-                it.showDialog(CreateJumpPadDialog.showDialog(it))
+                it.showDialog(DecideForTypeDialog.showDialog())
             }
         }
     }

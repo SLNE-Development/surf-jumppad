@@ -10,7 +10,7 @@ import org.bukkit.plugin.java.JavaPlugin
 
 class BukkitMain : SuspendingJavaPlugin() {
 
-    override fun onEnable() {
+    override suspend fun onEnableAsync() {
         jumpPadCommand()
 
         PlayerMoveListener.register()

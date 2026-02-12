@@ -3,7 +3,7 @@ package dev.slne.surf.jumppad.storage
 import com.google.auto.service.AutoService
 import dev.slne.surf.jumppad.pad.JumpPad
 import dev.slne.surf.jumppad.pad.JumpPadType
-import dev.slne.surf.jumppad.pad.jumpPadService
+import dev.slne.surf.jumppad.pad.service.jumpPadService
 import dev.slne.surf.jumppad.plugin
 import dev.slne.surf.surfapi.core.api.util.logger
 import org.bukkit.configuration.file.YamlConfiguration
@@ -35,7 +35,7 @@ class StorageService {
                 val typeString = config.getString("pad.data.type") ?: error("Type missing in ${path.fileName}")
                 val type = JumpPadType.valueOf(typeString.uppercase())
 
-                val strength = config.getDouble("pad.data.strength")
+                val strength = config.getInt("pad.data.strength")
 
                 val width = config.getInt("pad.data.width")
                 val length = config.getInt("pad.data.length")
@@ -64,7 +64,7 @@ class StorageService {
             config["pad.data.uuid"] = pad.uuid.toString()
             config["pad.data.origin"] = pad.origin
             config["pad.data.type"] = pad.type.name
-            config["pad.data.strength"] = pad.strength
+            config["pad.data.strength"] = pad.distance
             config["pad.data.width"] = pad.width
             config["pad.data.length"] = pad.length
 

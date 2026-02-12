@@ -40,7 +40,7 @@ object JumpPadInfoDialog {
                     appendNewline(2)
 
                     primary("Stärke: ")
-                    variableValue(pad.strength)
+                    variableValue(pad.distance)
                     appendNewline(2)
 
                     primary("Box: ")

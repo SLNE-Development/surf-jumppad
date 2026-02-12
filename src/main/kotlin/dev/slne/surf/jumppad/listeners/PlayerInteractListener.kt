@@ -1,7 +1,7 @@
 package dev.slne.surf.jumppad.listeners
 
 import dev.slne.surf.jumppad.dialogs.view.JumpPadInfoDialog
-import dev.slne.surf.jumppad.pad.jumpPadService
+import dev.slne.surf.jumppad.pad.service.jumpPadService
 import dev.slne.surf.surfapi.core.api.messages.Colors
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
@@ -33,9 +33,9 @@ object PlayerInteractListener : Listener {
         }
 
         player.sendText {
-            appendPrefix()
+            appendErrorPrefix()
             error("An dieser Stelle befindet sich ein JumpPad!")
-            appendNewPrefixedLine()
+            appendNewErrorPrefixedLine()
             error("Klicke ")
             append(clickable)
             error(" um dir das JumpPad anzusehen!")

@@ -5,7 +5,7 @@ package dev.slne.surf.jumppad.dialogs
 import dev.slne.surf.jumppad.dialogs.create.CreateJumpPadDialog
 import dev.slne.surf.jumppad.dialogs.view.JumpPadListDialog
 import dev.slne.surf.jumppad.pad.JumpPadType
-import dev.slne.surf.jumppad.pad.jumpPadService
+import dev.slne.surf.jumppad.pad.service.jumpPadService
 import dev.slne.surf.surfapi.bukkit.api.dialog.base
 import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
 import dev.slne.surf.surfapi.bukkit.api.dialog.dialog

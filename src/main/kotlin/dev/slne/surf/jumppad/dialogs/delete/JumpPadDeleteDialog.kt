@@ -5,7 +5,7 @@ package dev.slne.surf.jumppad.dialogs.delete
 import dev.slne.surf.jumppad.dialogs.view.JumpPadInfoDialog
 import dev.slne.surf.jumppad.dialogs.view.JumpPadListDialog
 import dev.slne.surf.jumppad.pad.JumpPad
-import dev.slne.surf.jumppad.pad.jumpPadService
+import dev.slne.surf.jumppad.pad.service.jumpPadService
 import dev.slne.surf.surfapi.bukkit.api.dialog.base
 import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
 import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
@@ -55,7 +55,7 @@ object JumpPadDeleteDialog {
                         appendNewline(2)
 
                         primary("Stärke: ")
-                        variableValue(pad.strength)
+                        variableValue(pad.distance)
                         appendNewline(2)
 
                         primary("Box: ")

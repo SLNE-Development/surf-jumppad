@@ -7,7 +7,7 @@ import dev.jorel.commandapi.kotlindsl.playerExecutor
 import dev.slne.surf.jumppad.dialogs.JumpPadMainDialog
 import dev.slne.surf.jumppad.dialogs.view.JumpPadInfoDialog
 import dev.slne.surf.jumppad.dialogs.view.JumpPadListDialog
-import dev.slne.surf.jumppad.pad.jumpPadService
+import dev.slne.surf.jumppad.pad.service.jumpPadService
 import dev.slne.surf.jumppad.permissions.Permissions
 import dev.slne.surf.surfapi.core.api.messages.Colors
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
@@ -35,14 +35,14 @@ fun jumpPadCommand() = commandAPICommand("jumppad") {
         if (pad == null) {
             val clickable = buildText {
                 text("HIER", Colors.VARIABLE_VALUE, TextDecoration.UNDERLINED)
-                hoverEvent(HoverEvent.showText(buildText { info("Klicke hier, um ir die Liste existierender jumpPads anzusehen.") }))
+                hoverEvent(HoverEvent.showText(buildText { info("Klicke hier, um ir die Liste existierender JumpPads anzusehen.") }))
                 clickEvent(ClickEvent.callback { player.showDialog(JumpPadListDialog.showDialog()) })
             }
 
             player.sendText {
-                appendPrefix()
+                appendErrorPrefix()
                 error("An dieser Stelle befindet sich kein JumpPad! ")
-                appendNewPrefixedLine()
+                appendNewErrorPrefixedLine()
                 error("Klicke ")
                 append(clickable)
                 error(" um dir die Liste existierender JumpPads anzusehen.")

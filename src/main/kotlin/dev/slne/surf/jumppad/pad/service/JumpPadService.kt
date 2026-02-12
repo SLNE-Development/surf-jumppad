@@ -1,5 +1,6 @@
-package dev.slne.surf.jumppad.pad
+package dev.slne.surf.jumppad.pad.service
 
+import dev.slne.surf.jumppad.pad.JumpPad
 import org.bukkit.Location
 
 class JumpPadManager {

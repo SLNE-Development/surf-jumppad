@@ -11,6 +11,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.util.Vector
 import java.util.*
+import kotlin.math.abs
 import kotlin.math.sqrt
 import kotlin.time.Duration.Companion.seconds
 
@@ -73,8 +74,8 @@ object PlayerMoveListener : Listener {
         val bx = loc.blockX.toDouble()
         val bz = loc.blockZ.toDouble()
 
-        if (kotlin.math.abs(loc.x - bx) < eps) loc.x = bx + 0.5
-        if (kotlin.math.abs(loc.z - bz) < eps) loc.z = bz + 0.5
+        if (abs(loc.x - bx) < eps) loc.x = bx + 0.5
+        if (abs(loc.z - bz) < eps) loc.z = bz + 0.5
 
         return loc
     }

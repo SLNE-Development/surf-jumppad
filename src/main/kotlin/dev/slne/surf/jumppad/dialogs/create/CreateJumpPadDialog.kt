@@ -49,7 +49,7 @@ object CreateJumpPadDialog {
             }
             input {
                 text(LOCATION_KEY) {
-                    label { text("Location") }
+                    label { text("Startposition") }
                     initial("${player.location.blockX} ${player.location.blockY} ${player.location.blockZ}")
                     width(400)
                 }
@@ -64,7 +64,7 @@ object CreateJumpPadDialog {
             if (type == JumpPadType.STATIC) {
                 input {
                     text(TARGET_LOCATION_KEY) {
-                        label { text("Location") }
+                        label { text("Zielposition") }
                         initial("X Y Z")
                         width(400)
                     }

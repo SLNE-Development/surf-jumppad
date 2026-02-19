@@ -18,18 +18,17 @@ import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Location
 
 fun jumpPadCommand() = commandAPICommand("jumppad") {
-
     withPermission(Permissions.COMMAND_JUMP_PAD_GENERIC)
-    locationArgument("location", LocationType.BLOCK_POSITION, optional = true)
+    locationArgument("jumppadLocation", LocationType.BLOCK_POSITION, optional = true)
 
     playerExecutor { player, arguments ->
-        val location = arguments.getUnchecked<Location>("location")
-        if (location == null) {
+        val jumppadLocation = arguments.getUnchecked<Location>("jumppadLocation ")
+        if (jumppadLocation == null) {
             player.showDialog(JumpPadMainDialog.showDialog())
             return@playerExecutor
         }
-        val padAtBlock = jumpPadService.getPadAt(location)
-        val padAbove = jumpPadService.getPadAt(location.clone().add(0.0, 1.0, 0.0))
+        val padAtBlock = jumpPadService.getPadAt(jumppadLocation)
+        val padAbove = jumpPadService.getPadAt(jumppadLocation.clone().add(0.0, 1.0, 0.0))
         val pad = padAtBlock ?: padAbove
 
         if (pad == null) {

@@ -11,27 +11,27 @@ import org.bukkit.entity.Player
 import org.bukkit.util.Vector
 import kotlin.math.PI
 import kotlin.math.sin
+import java.util.UUID
 
 val jumpPadBoostService = JumpPadBoostService
 
 object JumpPadBoostService {
-    private val activeBoosts = mutableMapOf<Player, Job>()
+    private val activeBoosts = mutableMapOf<UUID, Job>()
 
     fun startBoost(
         player: Player,
+        start: Location,
         target: Location,
         peakHeight: Double
     ) {
-        val start = player.location
         if (start.world != target.world) return
-        if(player.gameMode == GameMode.SPECTATOR) return
+        if (player.gameMode == GameMode.SPECTATOR) return
 
-        activeBoosts[player]?.cancel()
+        activeBoosts[player.uniqueId]?.cancel()
 
         val diff = target.toVector().subtract(start.toVector())
         val horizontalDiff = Vector(diff.x, 0.0, diff.z)
         val totalDist = horizontalDiff.length()
-
         if (totalDist < 0.1) return
 
         val direction = horizontalDiff.normalize()
@@ -39,16 +39,21 @@ object JumpPadBoostService {
 
         val job = plugin.launch {
             withContext(plugin.entityDispatcher(player)) {
-                runBoost(player, start.clone(), direction, totalDist, yOffset, peakHeight)
+                try {
+                    runBoost(player, start.clone(), target.clone(), direction, totalDist, yOffset, peakHeight)
+                } finally {
+                    activeBoosts.remove(player.uniqueId)
+                }
             }
         }
 
-        activeBoosts[player] = job
+        activeBoosts[player.uniqueId] = job
     }
 
     private suspend fun runBoost(
         player: Player,
         startLoc: Location,
+        targetLoc: Location,
         direction: Vector,
         targetDist: Double,
         yOffset: Double,
@@ -65,24 +70,39 @@ object JumpPadBoostService {
         val totalTicks = (targetDist * 1.5 + 15).toInt().coerceIn(20, 100)
 
         var tick = 0
-        while (currentCoroutineContext().isActive && tick < totalTicks && player.isOnline && !player.isDead && player.gameMode != GameMode.SPECTATOR) {
-            val progress = tick.toDouble() / totalTicks
+        while (
+            currentCoroutineContext().isActive &&
+            tick < totalTicks &&
+            player.isOnline &&
+            !player.isDead &&
+            player.gameMode != GameMode.SPECTATOR
+        ) {
             val nextProgress = (tick + 1).toDouble() / totalTicks
-
-            val hPos = targetDist * progress
-            val vPos = (sin(progress * PI) * peak) + (progress * yOffset)
 
             val nextHPos = targetDist * nextProgress
             val nextVPos = (sin(nextProgress * PI) * peak) + (nextProgress * yOffset)
 
-            val currentVec = direction.clone().multiply(hPos).setY(vPos)
-            val nextVec = direction.clone().multiply(nextHPos).setY(nextVPos)
+            val desiredNext = startLoc.clone()
+                .add(direction.clone().multiply(nextHPos))
+                .add(0.0, nextVPos, 0.0)
 
-            player.velocity = nextVec.subtract(currentVec)
+            val diff = desiredNext.toVector().subtract(player.location.toVector())
+            val vel = diff.multiply(0.25)
+            player.velocity = vel
+
+            player.velocity = vel
             player.fallDistance = 0f
 
             tick++
             delay(1.ticks)
+        }
+
+        if (player.isOnline && !player.isDead && player.gameMode != GameMode.SPECTATOR) {
+            val remaining = targetLoc.toVector().subtract(player.location.toVector())
+            if (remaining.lengthSquared() < 1.0) { // nur wenn wirklich nah dran
+                player.velocity = remaining
+                player.fallDistance = 0f
+            }
         }
     }
 

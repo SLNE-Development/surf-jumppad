@@ -18,42 +18,6 @@ object PlayerMoveListener : Listener {
     private val cooldowns: MutableMap<UUID, Long> = mutableMapOf()
     private val cooldown: Long = 3.seconds.inWholeMilliseconds
 
-//    @EventHandler
-//    fun onPlayerMove(event: PlayerMoveEvent) {
-//        if (!event.hasExplicitlyChangedBlock()) return
-//
-//        val player = event.player
-//        if (player.gameMode == GameMode.SPECTATOR) return
-//
-//        val pad = jumpPadService.getPadAt(event.to) ?: return
-//
-//        val now = System.currentTimeMillis()
-//        val lastUse = cooldowns[player.uniqueId] ?: 0L
-//        if (now - lastUse < cooldown) return
-//        cooldowns[player.uniqueId] = now
-//
-//        val direction = pad.type.getDirection(player)
-//
-//        if (pad.type == JumpPadType.VERTICAL) {
-//            val height = pad.distance.toDouble()
-//            val verticalVelocity = sqrt(2 * 0.08 * height)
-//
-//            player.velocity = direction.clone().multiply(verticalVelocity)
-//
-//        } else {
-//            val peak = (pad.distance / 3.5).coerceAtLeast(2.0)
-//            jumpPadBoostService.startBoost(
-//                player = player,
-//                targetDist = pad.distance.toDouble(),
-//                direction = direction,
-//                peakHeight = peak
-//            )
-//        }
-//
-//        animationService.playAnimation(player, pad.type)
-//        soundService.playSound(player, pad.type)
-//    }
-
     @EventHandler
     fun onPlayerMove(event: PlayerMoveEvent) {
         if (!event.hasExplicitlyChangedBlock()) return
@@ -66,9 +30,9 @@ object PlayerMoveListener : Listener {
         if (now - lastUse < cooldown) return
         cooldowns[player.uniqueId] = now
 
-//        val startLoc = event.to.block.location.add(0.5, 0.0, 0.5)
         val startLoc = pad.origin.clone().add(0.5, 0.0, 0.5)
-        val targetLoc: Location = when (pad.type) {
+
+        val rawTargetLoc: Location = when (pad.type) {
             JumpPadType.STATIC -> {
                 pad.targetLocation ?: pad.origin.clone().add(0.0, 5.0, 0.0)
             }
@@ -87,15 +51,30 @@ object PlayerMoveListener : Listener {
             }
         }
 
+        val targetLoc = rawTargetLoc.centerXZIfBlockAligned()
+
         val actualDistance = startLoc.distance(targetLoc)
         val peak = (actualDistance / 3.0).coerceAtLeast(3.0)
+
         jumpPadBoostService.startBoost(
             player = player,
+            start = startLoc,
             target = targetLoc,
             peakHeight = peak
         )
 
         animationService.playAnimation(player, pad.type)
         soundService.playSound(player, pad.type)
+    }
+
+    private fun Location.centerXZIfBlockAligned(eps: Double = 1e-6): Location {
+        val loc = this.clone()
+        val bx = loc.blockX.toDouble()
+        val bz = loc.blockZ.toDouble()
+
+        if (kotlin.math.abs(loc.x - bx) < eps) loc.x = bx + 0.5
+        if (kotlin.math.abs(loc.z - bz) < eps) loc.z = bz + 0.5
+
+        return loc
     }
 }

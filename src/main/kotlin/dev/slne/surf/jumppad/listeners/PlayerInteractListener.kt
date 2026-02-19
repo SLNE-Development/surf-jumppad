@@ -2,6 +2,7 @@ package dev.slne.surf.jumppad.listeners
 
 import dev.slne.surf.jumppad.dialogs.view.JumpPadInfoDialog
 import dev.slne.surf.jumppad.pad.service.jumpPadService
+import dev.slne.surf.jumppad.permissions.Permissions
 import dev.slne.surf.surfapi.core.api.messages.Colors
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
@@ -18,6 +19,8 @@ object PlayerInteractListener : Listener {
         val block = event.clickedBlock ?: return
         val location = block.location
         val player = event.player
+
+        if(!player.hasPermission(Permissions.COMMAND_JUMP_PAD_GENERIC)) return
 
         val padAtBlock = jumpPadService.getPadAt(location)
 

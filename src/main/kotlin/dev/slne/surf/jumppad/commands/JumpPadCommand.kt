@@ -22,7 +22,7 @@ fun jumpPadCommand() = commandAPICommand("jumppad") {
     locationArgument("jumppadLocation", LocationType.BLOCK_POSITION, optional = true)
 
     playerExecutor { player, arguments ->
-        val jumppadLocation = arguments.getUnchecked<Location>("location")
+        val jumppadLocation = arguments.getUnchecked<Location>("jumppadLocation ")
         if (jumppadLocation == null) {
             player.showDialog(JumpPadMainDialog.showDialog())
             return@playerExecutor

@@ -5,6 +5,7 @@ import dev.slne.surf.jumppad.pad.service.jumpPadBoostService
 import dev.slne.surf.jumppad.pad.service.jumpPadService
 import dev.slne.surf.jumppad.particles.animationService
 import dev.slne.surf.jumppad.sounds.soundService
+import org.bukkit.GameMode
 import org.bukkit.Location
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -25,6 +26,8 @@ object PlayerMoveListener : Listener {
         if (!event.hasExplicitlyChangedBlock()) return
         val player = event.player
 
+        if(event.player.gameMode == GameMode.SPECTATOR) return
+
         val pad = jumpPadService.getPadAt(event.to) ?: return
 
         val now = System.currentTimeMillis()
@@ -34,7 +37,7 @@ object PlayerMoveListener : Listener {
 
         val startLoc = pad.origin.clone().add(0.5, 0.0, 0.5)
 
-        val rawTargetLoc: Location = when (pad.type) {
+        val targetLoc: Location = when (pad.type) {
             JumpPadType.STATIC -> {
                 pad.targetLocation ?: pad.origin.clone().add(0.0, 5.0, 0.0)
             }
@@ -51,9 +54,7 @@ object PlayerMoveListener : Listener {
                 val dir = pad.type.getDirection(player)
                 pad.origin.clone().add(dir.multiply(pad.distance.toDouble()))
             }
-        }
-
-        val targetLoc = rawTargetLoc.centerXZIfBlockAligned()
+        }.centerXZIfBlockAligned()
 
         val actualDistance = startLoc.distance(targetLoc)
         val peak = (actualDistance / 3.0).coerceAtLeast(3.0)

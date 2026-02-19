@@ -38,7 +38,6 @@ object DecideForTypeDialog {
                 exitAction(backButton())
             }
         }
-
     }
 
     private fun backButton(): ActionButton = actionButton {

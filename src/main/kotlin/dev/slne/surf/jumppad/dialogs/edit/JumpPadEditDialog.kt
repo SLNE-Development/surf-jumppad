@@ -23,8 +23,8 @@ object JumpPadEditDialog {
     private const val BOX_KEY = "pad_box"
     private const val TARGET_LOCATION_KEY = "pad_target_location"
 
-    private val locationRegex = Regex("^-?\\d+\\s-?\\d+\\s-?\\d+\$")
-    private val boxRegex = Regex("^\\d+x\\d+$")
+    private val locationRegex by lazy { Regex("^-?\\d+\\s-?\\d+\\s-?\\d+\$") }
+    private val boxRegex by lazy { Regex("^\\d+x\\d+$") }
 
     fun showDialog(pad: JumpPad) = dialog {
         base {

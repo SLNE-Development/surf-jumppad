@@ -18,9 +18,8 @@ import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Location
 
 fun jumpPadCommand() = commandAPICommand("jumppad") {
-
     withPermission(Permissions.COMMAND_JUMP_PAD_GENERIC)
-    locationArgument("location", LocationType.BLOCK_POSITION, optional = true)
+    locationArgument("jumppadLocation", LocationType.BLOCK_POSITION, optional = true)
 
     playerExecutor { player, arguments ->
         val location = arguments.getUnchecked<Location>("location")

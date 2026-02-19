@@ -12,13 +12,16 @@ import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.PI
 import kotlin.math.sin
 
 val jumpPadBoostService = JumpPadBoostService
 
 object JumpPadBoostService {
-    private val activeBoosts = mutableMapOf<UUID, Job>()
+    private val activeBoosts = ConcurrentHashMap<UUID, Job>()
+
+    fun isBoosting(player: Player): Boolean { return activeBoosts[player.uniqueId]?.isActive == true }
 
     fun startBoost(
         player: Player,

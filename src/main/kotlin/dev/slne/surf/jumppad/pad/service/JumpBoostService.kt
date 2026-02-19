@@ -3,15 +3,17 @@ package dev.slne.surf.jumppad.pad.service
 import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
 import com.github.shynixn.mccoroutine.folia.ticks
+import dev.slne.surf.jumppad.pad.JumpPadType
+import dev.slne.surf.jumppad.particles.animationService
 import dev.slne.surf.jumppad.plugin
 import kotlinx.coroutines.*
 import org.bukkit.GameMode
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
+import java.util.*
 import kotlin.math.PI
 import kotlin.math.sin
-import java.util.UUID
 
 val jumpPadBoostService = JumpPadBoostService
 
@@ -22,7 +24,8 @@ object JumpPadBoostService {
         player: Player,
         start: Location,
         target: Location,
-        peakHeight: Double
+        peakHeight: Double,
+        padType: JumpPadType
     ) {
         if (start.world != target.world) return
         if (player.gameMode == GameMode.SPECTATOR) return
@@ -40,7 +43,7 @@ object JumpPadBoostService {
         val job = plugin.launch {
             withContext(plugin.entityDispatcher(player)) {
                 try {
-                    runBoost(player, start.clone(), target.clone(), direction, totalDist, yOffset, peakHeight)
+                    runBoost(player, start.clone(), target.clone(), direction, totalDist, yOffset, peakHeight, padType)
                 } finally {
                     activeBoosts.remove(player.uniqueId)
                 }
@@ -57,7 +60,8 @@ object JumpPadBoostService {
         direction: Vector,
         targetDist: Double,
         yOffset: Double,
-        initialPeak: Double
+        initialPeak: Double,
+        padType: JumpPadType
     ) {
         var peak = initialPeak
 
@@ -93,13 +97,15 @@ object JumpPadBoostService {
             player.velocity = vel
             player.fallDistance = 0f
 
+            animationService.playBoostAnimation(player, padType, tick)
+
             tick++
             delay(1.ticks)
         }
 
         if (player.isOnline && !player.isDead && player.gameMode != GameMode.SPECTATOR) {
             val remaining = targetLoc.toVector().subtract(player.location.toVector())
-            if (remaining.lengthSquared() < 1.0) { // nur wenn wirklich nah dran
+            if (remaining.lengthSquared() < 1.0) {
                 player.velocity = remaining
                 player.fallDistance = 0f
             }

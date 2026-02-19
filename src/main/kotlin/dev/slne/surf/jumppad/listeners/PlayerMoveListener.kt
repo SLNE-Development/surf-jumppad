@@ -40,7 +40,7 @@ object PlayerMoveListener : Listener {
             JumpPadType.VERTICAL -> {
                 val height = pad.distance.toDouble()
                 player.velocity = Vector(0.0, sqrt(2 * 0.08 * height), 0.0)
-                animationService.playAnimation(player, pad.type)
+                animationService.playStartAnimation(player, pad.type)
                 soundService.playSound(player, pad.type)
                 return
             }
@@ -60,10 +60,11 @@ object PlayerMoveListener : Listener {
             player = player,
             start = startLoc,
             target = targetLoc,
-            peakHeight = peak
+            peakHeight = peak,
+            padType = pad.type
         )
 
-        animationService.playAnimation(player, pad.type)
+        animationService.playStartAnimation(player, pad.type)
         soundService.playSound(player, pad.type)
     }
 

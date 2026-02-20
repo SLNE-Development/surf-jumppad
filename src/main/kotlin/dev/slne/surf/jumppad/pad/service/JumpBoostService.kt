@@ -115,6 +115,11 @@ object JumpPadBoostService {
         }
     }
 
+    fun stopBoost(player: Player) {
+        activeBoosts[player.uniqueId]?.cancel()
+        activeBoosts.remove(player.uniqueId)
+    }
+
     private fun collides(start: Location, dir: Vector, dist: Double, yOff: Double, peak: Double): Boolean {
         val steps = (dist * 2).toInt().coerceAtLeast(5)
         for (i in 1..steps) {

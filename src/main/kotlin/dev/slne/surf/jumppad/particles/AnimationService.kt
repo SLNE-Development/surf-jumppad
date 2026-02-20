@@ -1,7 +1,6 @@
 package dev.slne.surf.jumppad.particles
 
 import dev.slne.surf.jumppad.pad.JumpPadType
-import org.bukkit.Particle
 import org.bukkit.entity.Player
 
 val animationService = AnimationService

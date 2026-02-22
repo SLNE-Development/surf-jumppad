@@ -10,6 +10,7 @@ import org.bukkit.Location
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerMoveEvent
+import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.util.Vector
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -80,5 +81,10 @@ object PlayerMoveListener : Listener {
         if (abs(loc.z - bz) < eps) loc.z = bz + 0.5
 
         return loc
+    }
+
+    @EventHandler
+    fun onPlayerQuit(event: PlayerQuitEvent) {
+        cooldowns.remove(event.player.uniqueId)
     }
 }

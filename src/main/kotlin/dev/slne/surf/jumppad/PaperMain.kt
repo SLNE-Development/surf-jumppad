@@ -12,7 +12,7 @@ import org.bukkit.Location
 import org.bukkit.plugin.java.JavaPlugin
 import java.util.*
 
-class BukkitMain : SuspendingJavaPlugin() {
+class PaperMain : SuspendingJavaPlugin() {
 
     override suspend fun onEnableAsync() {
         jumpPadCommand()
@@ -37,4 +37,4 @@ fun SurfComponentBuilder.appendBullet() {
     appendSpace()
 }
 
-val plugin get() = JavaPlugin.getPlugin(BukkitMain::class.java)
+val plugin get() = JavaPlugin.getPlugin(PaperMain::class.java)

@@ -2,7 +2,7 @@ plugins {
     id("dev.slne.surf.surfapi.gradle.paper-plugin") version "1.21.11+"
 }
 surfPaperPluginApi {
-    mainClass("dev.slne.surf.jumppad.BukkitMain")
+    mainClass("dev.slne.surf.jumppad.PaperMain")
     generateLibraryLoader(false)
     foliaSupported(true)
 

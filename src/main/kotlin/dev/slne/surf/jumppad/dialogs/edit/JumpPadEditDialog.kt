@@ -1,169 +1,185 @@
 @file:Suppress("UnstableApiUsage")
 
-package dev.slne.surf.jumppad.dialogs.edit
+package dev.slne.surf.teleporter.dialogs.edit
 
-import dev.slne.surf.jumppad.dialogs.edit.result.JumpPadEditFailResultDialog
+import dev.slne.surf.jumppad.appendBullet
+import dev.slne.surf.jumppad.dialogs.DIALOG_TITLE
+import dev.slne.surf.jumppad.dialogs.error.InvalidField
+import dev.slne.surf.jumppad.dialogs.error.JumpPadActionType
+import dev.slne.surf.jumppad.dialogs.error.JumpPadErrorDialog
+import dev.slne.surf.jumppad.dialogs.error.JumpPadSuccessDialog
 import dev.slne.surf.jumppad.dialogs.view.JumpPadInfoDialog
+import dev.slne.surf.jumppad.formatToCoordString
 import dev.slne.surf.jumppad.pad.JumpPad
 import dev.slne.surf.jumppad.pad.JumpPadType
-import dev.slne.surf.jumppad.pad.service.jumpPadService
+import dev.slne.surf.jumppad.pad.service.JumpPadService
 import dev.slne.surf.surfapi.bukkit.api.dialog.base
 import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
 import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
 import dev.slne.surf.surfapi.bukkit.api.dialog.type
-import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import dev.slne.surf.surfapi.core.api.messages.adventure.appendNewline
 import io.papermc.paper.registry.data.dialog.ActionButton
+import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Location
 import org.bukkit.World
 
 object JumpPadEditDialog {
-    private const val LOCATION_KEY = "pad_location"
-    private const val STRENGTH_KEY = "pad_strength"
-    private const val BOX_KEY = "pad_box"
-    private const val TARGET_LOCATION_KEY = "pad_target_location"
+    private const val LOCATION_KEY = "jumppad_location"
+    private const val TARGET_LOCATION_KEY = "jumppad_target_location"
+    private const val PEAK_HEIGHT_KEY = "jumppad_peak"
+    private const val BOX_KEY = "jumppad_box"
 
-    private val locationRegex by lazy { Regex("^-?\\d+\\s-?\\d+\\s-?\\d+\$") }
+    private val locationRegex by lazy { Regex("^-?\\d+(\\.\\d+)?(?:\\s+-?\\d+(\\.\\d+)?){2}$") }
     private val boxRegex by lazy { Regex("^\\d+x\\d+$") }
 
-    fun showDialog(pad: JumpPad) = dialog {
+    fun createDialog(jumpPad: JumpPad) = dialog {
         base {
-            title {
-                primary("JUMPPAD ".toSmallCaps())
-                success("EDITIEREN ".toSmallCaps())
-                variableValue("${pad.origin.blockX} ${pad.origin.blockY} ${pad.origin.blockZ}")
-            }
+            title(DIALOG_TITLE)
 
             body {
-                plainMessage(450) {
-                    info("Du bearbeitest das JumpPad:")
-                    variableValue(" ${pad.uuid}")
+                plainMessage(400) {
+                    primary("Du konfigurierst gerade ein JumpPad.", TextDecoration.BOLD, TextDecoration.UNDERLINED)
                     appendNewline(2)
 
-                    primary("Typ: ")
-                    append(pad.type.displayComponent)
-                    appendNewline()
+                    info("Im Folgenden siehst du die aktuellen Werte des Teleporters:")
+                    appendNewline(2)
 
-                    if (pad.type == JumpPadType.STATIC) {
-                        primary("Ziel: ")
-                        val target = pad.targetLocation
-                        variableValue(if (target != null) "${target.blockX} ${target.blockY} ${target.blockZ}" else "Nicht gesetzt")
+                    appendBullet()
+                    primary("Typ:")
+                    appendSpace()
+                    append(jumpPad.type.displayComponent)
+                    appendNewline(2)
+
+                    appendBullet()
+                    primary("Startposition:")
+                    appendSpace()
+                    variableValue(jumpPad.originLocation.formatToCoordString())
+                    appendNewline(2)
+
+                    if (jumpPad.type == JumpPadType.STATIC) {
+                        appendBullet()
+                        primary("Zielposition:")
+                        appendSpace()
+                        variableValue(jumpPad.targetLocation?.formatToCoordString() ?: "Kein festes Ziel")
+                        appendNewline(2)
                     } else {
-                        primary("Power: ")
-                        variableValue("${pad.distance} Blöcke")
+                        appendBullet()
+                        primary("Stärke (Blöcke):")
+                        appendSpace()
+                        variableValue(jumpPad.distance)
+                        appendNewline(2)
                     }
-                    appendNewline()
 
-                    primary("Area: ")
-                    variableValue("${pad.width}x${pad.length}")
+                    appendBullet()
+                    primary("Welt:")
+                    appendSpace()
+                    variableValue(jumpPad.originLocation.world?.name ?: "Unbekannt")
                     appendNewline(2)
 
-                    info("Passe die Werte über die unteren Felder an.")
+                    appendBullet()
+                    primary("Boundingbox:")
+                    appendSpace()
+                    variableValue("${jumpPad.width}x${jumpPad.length}")
+                    appendNewline(2)
                 }
             }
 
             input {
                 text(LOCATION_KEY) {
-                    label { text("Location (X Y Z)") }
-                    initial("${pad.origin.blockX} ${pad.origin.blockY} ${pad.origin.blockZ}")
+                    label { text("Startposition (X Y Z)") }
+                    initial("${jumpPad.originX} ${jumpPad.originY} ${jumpPad.originZ}")
                     width(400)
                 }
+            }
 
+            input {
+                text(TARGET_LOCATION_KEY) {
+                    label { text("Zielposition (X Y Z)") }
+                    initial(if (jumpPad.targetX != null) "${jumpPad.targetX} ${jumpPad.targetY} ${jumpPad.targetZ}" else "")
+                    width(400)
+                }
+            }
+
+            input {
+                text(PEAK_HEIGHT_KEY) {
+                    label { text("Stärke (Blöcke)") }
+                    initial(jumpPad.distance.toString())
+                    width(400)
+                }
+            }
+
+            input {
                 text(BOX_KEY) {
-                    label { text("Box (max. 10x10)") }
-                    initial("${pad.width}x${pad.length}")
+                    label { text("Boundingbox (max. 10x10)") }
+                    initial("${jumpPad.width}x${jumpPad.length}")
                     width(400)
-                }
-
-                if (pad.type == JumpPadType.STATIC) {
-                    text(TARGET_LOCATION_KEY) {
-                        label { text("Ziel-Location (X Y Z)") }
-                        val target = pad.targetLocation
-                        initial(if (target != null) "${target.blockX} ${target.blockY} ${target.blockZ}" else "")
-                        width(400)
-                    }
-                } else {
-                    numberRange(STRENGTH_KEY, 1.0..200.0) {
-                        label { text("Stärke") }
-                        initial(pad.distance.toFloat())
-                        step(1.0f)
-                        width(400)
-                    }
                 }
             }
         }
 
         type {
-            confirmation(saveButton(pad), backButton(pad))
+            confirmation(saveButton(jumpPad), backButton(jumpPad))
         }
     }
 
-    private fun saveButton(oldPad: JumpPad): ActionButton = actionButton {
-        label { success("Änderungen speichern") }
-        tooltip { info("Klicke hier, um die Änderungen zu übernehmen.") }
+    private fun saveButton(jumpPad: JumpPad): ActionButton = actionButton {
+        label { success("Speichern") }
         action {
             customPlayerClick { content, player ->
-                val locationString = content.getText(LOCATION_KEY) ?: ""
-                val boxString = content.getText(BOX_KEY) ?: ""
+                val locStr = content.getText(LOCATION_KEY) ?: ""
+                val targetStr = content.getText(TARGET_LOCATION_KEY) ?: ""
+                val peakStr = content.getText(PEAK_HEIGHT_KEY) ?: ""
+                val boxStr = content.getText(BOX_KEY) ?: ""
 
-                if (!locationRegex.matches(locationString) || !boxRegex.matches(boxString)) {
-                    player.showDialog(JumpPadEditFailResultDialog.showDialog(oldPad))
+                val invalidFields = mutableListOf<InvalidField>()
+                if (!locationRegex.matches(locStr)) invalidFields.add(InvalidField.START_LOCATION)
+                if (targetStr.isNotEmpty() && !locationRegex.matches(targetStr)) invalidFields.add(InvalidField.TARGET_LOCATION)
+                if (!boxRegex.matches(boxStr)) invalidFields.add(InvalidField.BOX_INVALID)
+
+                val peak = peakStr.toIntOrNull()
+                if (peak == null) invalidFields.add(InvalidField.PEAK_INVALID)
+
+                if (invalidFields.isNotEmpty()) {
+                    player.showDialog(
+                        JumpPadErrorDialog.createDialog(
+                            JumpPadActionType.EDIT,
+                            invalidFields,
+                            emptyMap(),
+                            jumpPad,
+                            jumpPad.type
+                        )
+                    )
                     return@customPlayerClick
                 }
 
-                val world = player.location.world ?: return@customPlayerClick
-                val origin = parseLocation(locationString, world)
-                val (width, length) = parseBox(boxString)
+                val (width, length) = parseBox(boxStr)
+                val world = jumpPad.originLocation.world!!
 
-                if (width > 10 || length > 10) {
-                    player.showDialog(JumpPadEditFailResultDialog.showDialog(oldPad))
-                    return@customPlayerClick
+                jumpPad.apply {
+                    this.originLocation = parseSimpleLocation(locStr, world)
+                    this.targetLocation = if (targetStr.isNotEmpty()) parseSimpleLocation(targetStr, world) else null
+                    this.width = width
+                    this.length = length
                 }
+                JumpPadService.savePads()
 
-                var targetLoc: Location? = null
-                var strength = oldPad.distance
-
-                if (oldPad.type == JumpPadType.STATIC) {
-                    val targetStr = content.getText(TARGET_LOCATION_KEY) ?: ""
-                    if (!locationRegex.matches(targetStr)) {
-                        player.showDialog(JumpPadEditFailResultDialog.showDialog(oldPad))
-                        return@customPlayerClick
-                    }
-                    targetLoc = parseLocation(targetStr, world)
-                } else {
-                    strength = content.getFloat(STRENGTH_KEY)?.toInt() ?: oldPad.distance
-                }
-
-                val updatedPad = oldPad.copy(
-                    origin = origin,
-                    distance = strength,
-                    width = width,
-                    length = length,
-                    targetLocation = targetLoc
-                )
-
-                jumpPadService.updatePad(updatedPad)
-                player.showDialog(JumpPadInfoDialog.showDialog(updatedPad))
+                player.showDialog(JumpPadSuccessDialog.createDialog(JumpPadActionType.EDIT, jumpPad))
             }
         }
     }
 
-    private fun backButton(pad: JumpPad): ActionButton = actionButton {
-        label { text("Zurück") }
-        tooltip { info("Klicke hier, um den Vorgang abzubrechen.") }
-        action {
-            playerCallback { it.showDialog(JumpPadInfoDialog.showDialog(pad)) }
-        }
+    private fun backButton(jumpPad: JumpPad) = actionButton {
+        label { spacer("Zurück") }
+        action { playerCallback { it.showDialog(JumpPadInfoDialog.createDialog(jumpPad)) } }
     }
 
     private fun parseBox(box: String): Pair<Int, Int> {
         val parts = box.split("x").mapNotNull { it.toIntOrNull() }
-        return if (parts.size == 2) parts[0] to parts[1] else 3 to 3
+        return if (parts.size == 2) parts[0] to parts[1] else 1 to 1
     }
 
-    private fun parseLocation(raw: String, world: World): Location {
-        val parts = raw.trim().split(Regex("\\s+")).mapNotNull { it.toDoubleOrNull() }
-        if (parts.size < 3) return world.spawnLocation
-        return Location(world, parts[0], parts[1], parts[2])
+    private fun parseSimpleLocation(raw: String, world: World): Location {
+        val p = raw.split(" ").map { it.toDoubleOrNull() ?: 0.0 }
+        return Location(world, p[0], p[1], p[2])
     }
 }

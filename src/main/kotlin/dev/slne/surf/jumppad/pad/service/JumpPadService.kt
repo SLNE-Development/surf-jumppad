@@ -1,46 +1,26 @@
 package dev.slne.surf.jumppad.pad.service
 
 import dev.slne.surf.jumppad.pad.JumpPad
+import dev.slne.surf.surfapi.core.api.util.requiredService
+import it.unimi.dsi.fastutil.objects.ObjectList
 import org.bukkit.Location
+import org.jetbrains.annotations.Unmodifiable
+import java.util.*
 
-class JumpPadManager {
+private val jumppadService = requiredService<JumpPadService>()
 
-    private val pads = mutableSetOf<JumpPad>()
+interface JumpPadService {
+    val jumpPadCount: Int
+    val jumpPads: @Unmodifiable ObjectList<JumpPad>
 
-    fun registerPad(pad: JumpPad) {
-        pads.removeIf { it.uuid == pad.uuid }
-        addPad(pad)
-    }
+    fun registerPads()
+    fun registerPad(jumpPad: JumpPad)
+    fun unregisterPad(jumpPad: JumpPad)
 
-    fun addPad(pad: JumpPad) {
-        pads.add(pad)
-    }
+    fun getPadAt(location: Location): JumpPad?
+    fun savePads()
 
-    fun deletePad(pad: JumpPad) {
-        pads.removeIf { it.uuid == pad.uuid }
-    }
+    fun generateUnusedId(): UUID
 
-    fun updatePad(pad: JumpPad) {
-        deletePad(pad)
-        addPad(pad)
-    }
-
-    fun getPadAt(location: Location): JumpPad? {
-        return pads.firstOrNull { pad ->
-            val dx = location.blockX - pad.origin.blockX
-            val dz = location.blockZ - pad.origin.blockZ
-
-            dx in -(pad.width / 2)..(pad.width / 2) &&
-                    dz in -(pad.length / 2)..(pad.length / 2) &&
-                    location.blockY == pad.origin.blockY
-        }
-    }
-
-    fun getPads(): List<JumpPad> = pads.toList()
-
-    companion object {
-        val INSTANCE = JumpPadManager()
-    }
+    companion object : JumpPadService by jumppadService
 }
-
-val jumpPadService get() = JumpPadManager.INSTANCE

@@ -1,7 +1,7 @@
 package dev.slne.surf.jumppad.listeners
 
 import dev.slne.surf.jumppad.dialogs.view.JumpPadInfoDialog
-import dev.slne.surf.jumppad.pad.service.jumpPadService
+import dev.slne.surf.jumppad.pad.service.JumpPadService
 import dev.slne.surf.jumppad.permissions.Permissions
 import dev.slne.surf.surfapi.core.api.messages.Colors
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
@@ -20,19 +20,19 @@ object PlayerInteractListener : Listener {
         val location = block.location
         val player = event.player
 
-        if(!player.hasPermission(Permissions.COMMAND_JUMP_PAD_GENERIC)) return
+        if (!player.hasPermission(Permissions.COMMAND_JUMP_PAD_GENERIC)) return
 
-        val padAtBlock = jumpPadService.getPadAt(location)
+        val padAtBlock = JumpPadService.getPadAt(location)
 
         val blockAboveLocation = location.clone().add(0.0, 1.0, 0.0)
-        val padAbove = jumpPadService.getPadAt(blockAboveLocation)
+        val padAbove = JumpPadService.getPadAt(blockAboveLocation)
 
         val pad = padAtBlock ?: padAbove ?: return
 
         val clickable = buildText {
             text("HIER", Colors.VARIABLE_VALUE, TextDecoration.UNDERLINED)
             hoverEvent(HoverEvent.showText(buildText { info("Klicke hier, um dir das JumpPad anzusehen.") }))
-            clickEvent(ClickEvent.callback { player.showDialog(JumpPadInfoDialog.showDialog(pad)) })
+            clickEvent(ClickEvent.callback { player.showDialog(JumpPadInfoDialog.createDialog(pad)) })
         }
 
         player.sendText {

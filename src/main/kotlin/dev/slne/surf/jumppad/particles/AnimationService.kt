@@ -3,8 +3,6 @@ package dev.slne.surf.jumppad.particles
 import dev.slne.surf.jumppad.pad.JumpPadType
 import org.bukkit.entity.Player
 
-val animationService = AnimationService
-
 object AnimationService {
     fun playStartAnimation(player: Player, type: JumpPadType) {
         val loc = player.location.clone().add(0.0, 1.0, 0.0)

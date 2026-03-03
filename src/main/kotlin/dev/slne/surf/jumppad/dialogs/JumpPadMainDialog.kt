@@ -4,85 +4,67 @@ package dev.slne.surf.jumppad.dialogs
 
 import dev.slne.surf.jumppad.dialogs.create.DecideForTypeDialog
 import dev.slne.surf.jumppad.dialogs.view.JumpPadListDialog
-import dev.slne.surf.jumppad.pad.JumpPadType
-import dev.slne.surf.jumppad.pad.service.jumpPadService
+import dev.slne.surf.jumppad.pad.service.JumpPadService
 import dev.slne.surf.surfapi.bukkit.api.dialog.base
 import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
 import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
 import dev.slne.surf.surfapi.bukkit.api.dialog.type
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import dev.slne.surf.surfapi.core.api.messages.adventure.appendNewline
+import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import io.papermc.paper.registry.data.dialog.ActionButton
+import net.kyori.adventure.text.format.TextDecoration
+
+val DIALOG_TITLE = buildText { primary("JUMPPAD".toSmallCaps()) }
 
 object JumpPadMainDialog {
-    fun showDialog() = dialog {
+    fun createDialog() = dialog {
         base {
-            val pads = jumpPadService.getPads()
-            title {
-                primary("JUMPPAD ".toSmallCaps())
-                success("VERWALTUNG".toSmallCaps())
-            }
+            val jumpPadCount = JumpPadService.jumpPadCount
+            title(DIALOG_TITLE)
+
             body {
                 plainMessage(400) {
-                    info("Willkommen in der JumpPad-Verwaltung.")
+                    primary("Du befindest dich im Hauptmenü.", TextDecoration.BOLD, TextDecoration.UNDERLINED)
                     appendNewline(2)
 
-                    info("Aktuell existieren insgesamt ")
-                    variableValue(pads.size)
+                    info("Aktuell existieren ")
+                    variableValue(jumpPadCount)
                     info(" JumpPads.")
                     appendNewline(2)
-
-                    if (pads.isNotEmpty()) {
-                        primary("Statistik nach Typen:")
-                        appendNewline()
-
-                        val padsByType = pads.groupBy { it.type }
-                        JumpPadType.entries.forEach { type ->
-                            val count = padsByType[type]?.size ?: 0
-                            if (count > 0) {
-                                spacer(" - ")
-                                append(type.displayComponent)
-                                info(": ")
-                                variableValue(count)
-                                appendNewline()
-                            }
-                        }
-                    } else {
-                        error("Es wurden noch keine JumpPads erstellt.")
-                    }
                 }
             }
         }
 
         type {
             multiAction {
-                action(createPadButton())
+                action(createJumpPadButton())
                 action(showPadsButton())
                 exitAction(exitButton())
             }
         }
     }
 
-    private fun createPadButton(): ActionButton = actionButton {
-        label { success("JumPad erstellen") }
+    private fun createJumpPadButton(): ActionButton = actionButton {
+        label { success("JumpPad erstellen") }
         tooltip {
             info("Klicke hier, um ein neues JumpPad zu erstellen.")
         }
         action {
             playerCallback {
-                it.showDialog(DecideForTypeDialog.showDialog())
+                it.showDialog(DecideForTypeDialog.createDialog())
             }
         }
     }
 
     internal fun showPadsButton(): ActionButton = actionButton {
-        label { primary("JumPad ansehen") }
+        label { primary("JumpPads verwalten") }
         tooltip {
-            info("Klicke hier, um die Liste aller existierenden JumpPads zu öffnen.")
+            info("Klicke hier, um die existierenden JumpPads anzusehen.")
         }
         action {
             playerCallback {
-                it.showDialog(JumpPadListDialog.showDialog())
+                it.showDialog(JumpPadListDialog.createDialog())
             }
         }
     }

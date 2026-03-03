@@ -2,33 +2,39 @@
 
 package dev.slne.surf.jumppad.dialogs.view
 
+// Achtung: Ich habe hier JumpPadService angenommen, passe dies ggf. an deinen echten Klassennamen an
+import dev.slne.surf.jumppad.dialogs.DIALOG_TITLE
 import dev.slne.surf.jumppad.dialogs.JumpPadMainDialog
 import dev.slne.surf.jumppad.dialogs.create.DecideForTypeDialog
 import dev.slne.surf.jumppad.pad.JumpPad
-import dev.slne.surf.jumppad.pad.JumpPadType
-import dev.slne.surf.jumppad.pad.service.jumpPadService
+import dev.slne.surf.jumppad.pad.service.JumpPadService
 import dev.slne.surf.surfapi.bukkit.api.dialog.base
 import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
 import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
 import dev.slne.surf.surfapi.bukkit.api.dialog.type
-import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import dev.slne.surf.surfapi.core.api.messages.adventure.appendNewline
 import dev.slne.surf.surfapi.core.api.util.toObjectSet
 import io.papermc.paper.dialog.Dialog
+import net.kyori.adventure.text.format.TextDecoration
 
 object JumpPadListDialog {
-    fun showDialog(): Dialog {
-        val pads = jumpPadService.getPads()
+    fun createDialog(): Dialog {
+        val jumpPads = JumpPadService.jumpPads
 
-        val dialogList = buildPadDialogList(pads)
+        val dialogList = buildPadDialogList(jumpPads)
         if (dialogList.isEmpty()) {
             return dialog {
                 base {
-                    title {
-                        primary("JUMPPAD LISTE".toSmallCaps())
-                    }
+                    title(DIALOG_TITLE)
                     body {
-                        plainMessage(300) {
+                        plainMessage(400) {
+                            primary(
+                                "Du befindest dich in der JumpPad-Übersicht.",
+                                TextDecoration.BOLD,
+                                TextDecoration.UNDERLINED
+                            )
+                            appendNewline(2)
+
                             error("Es existieren aktuell keine JumpPads.")
                         }
                     }
@@ -41,33 +47,19 @@ object JumpPadListDialog {
 
         return dialog {
             base {
-                title {
-                    primary("JUMPPAD LISTE".toSmallCaps())
-                }
-
+                title(DIALOG_TITLE)
                 body {
                     plainMessage(400) {
-                        info("Aktuell existieren insgesamt ")
-                        variableValue(pads.size)
-                        info(" JumpPads.")
+                        primary(
+                            "Du befindest dich in der JumpPad-Übersicht.",
+                            TextDecoration.BOLD,
+                            TextDecoration.UNDERLINED
+                        )
                         appendNewline(2)
 
-                        primary("Statistik nach Typen:")
-                        appendNewline()
-
-                        val padsByType = pads.groupBy { it.type }
-                        JumpPadType.entries.forEach { type ->
-                            val count = padsByType[type]?.size ?: 0
-                            if (count > 0) {
-                                spacer(" - ")
-                                append(type.displayComponent)
-                                info(": ")
-                                variableValue(count)
-                                appendNewline()
-                            }
-                        }
-                        appendNewline()
-                        info("Klicke auf ein JumpPad, um Details zu sehen.")
+                        info("Aktuell existieren ")
+                        variableValue(jumpPads.size)
+                        info(" JumpPads.")
                     }
                 }
             }
@@ -75,23 +67,23 @@ object JumpPadListDialog {
             type {
                 dialogList {
                     addAll(dialogList)
-                    buttonWidth(200)
-                    columns(3)
+                    buttonWidth(400)
+                    columns(1)
                     exitAction(backButton())
                 }
             }
         }
     }
 
-    private fun buildPadDialogList(pads: Collection<JumpPad>) =
-        pads.map { JumpPadInfoDialog.showDialog(it) }.toObjectSet()
+    private fun buildPadDialogList(jumpPads: Collection<JumpPad>) =
+        jumpPads.map { JumpPadInfoDialog.createDialog(it) }.toObjectSet()
 
     private fun backButton() = actionButton {
         label { spacer("Zurück") }
         tooltip { info("Klicke hier, um zurück zum Hauptmenü zu gelangen.") }
         action {
             playerCallback {
-                it.showDialog(JumpPadMainDialog.showDialog())
+                it.showDialog(JumpPadMainDialog.createDialog())
             }
         }
     }
@@ -101,7 +93,7 @@ object JumpPadListDialog {
         tooltip { info("Klicke hier, um ein JumpPad zu erstellen.") }
         action {
             playerCallback {
-                it.showDialog(DecideForTypeDialog.showDialog())
+                it.showDialog(DecideForTypeDialog.createDialog())
             }
         }
     }

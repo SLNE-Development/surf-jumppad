@@ -2,26 +2,31 @@
 
 package dev.slne.surf.jumppad.dialogs.create
 
+import dev.slne.surf.jumppad.dialogs.DIALOG_TITLE
 import dev.slne.surf.jumppad.dialogs.JumpPadMainDialog
 import dev.slne.surf.jumppad.pad.JumpPadType
 import dev.slne.surf.surfapi.bukkit.api.dialog.base
 import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
 import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
 import dev.slne.surf.surfapi.bukkit.api.dialog.type
-import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import dev.slne.surf.surfapi.core.api.messages.adventure.appendNewline
 import io.papermc.paper.registry.data.dialog.ActionButton
+import net.kyori.adventure.text.format.TextDecoration
 
 object DecideForTypeDialog {
-    fun showDialog() = dialog {
+    fun createDialog() = dialog {
         base {
-            title {
-                primary("JUMPPAD ".toSmallCaps())
-                info("TYP WÄHLEN".toSmallCaps())
-            }
+            title(DIALOG_TITLE)
 
             body {
                 plainMessage(400) {
+                    primary(
+                        "Du bist dabei ein neues JumpPad zu erstellen.",
+                        TextDecoration.BOLD,
+                        TextDecoration.UNDERLINED
+                    )
+                    appendNewline(2)
+
                     info("Wähle aus, welchen Typ von JumpPad du erstellen möchtest.")
                     appendNewline(2)
                 }
@@ -41,13 +46,13 @@ object DecideForTypeDialog {
     }
 
     private fun backButton(): ActionButton = actionButton {
-        label { error("Erstellung abbrechen") }
+        label { spacer("Zurück") }
         tooltip {
             info("Klicke hier, um zurück zum Hauptmenü zu gelangen.")
         }
         action {
             playerCallback {
-                it.showDialog(JumpPadMainDialog.showDialog())
+                it.showDialog(JumpPadMainDialog.createDialog())
             }
         }
     }
@@ -59,11 +64,7 @@ object DecideForTypeDialog {
         }
         action {
             playerCallback {
-                if (type == JumpPadType.STATIC) {
-                    it.showDialog(CreateJumpPadDialog.showDialog(it, type))
-                    return@playerCallback
-                }
-                it.showDialog(CreateJumpPadDialog.showDialog(it, type))
+                it.showDialog(CreateJumpPadDialog.createDialog(it, type))
             }
         }
     }

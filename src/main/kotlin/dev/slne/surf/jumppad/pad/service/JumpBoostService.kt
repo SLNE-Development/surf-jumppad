@@ -4,7 +4,7 @@ import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
 import com.github.shynixn.mccoroutine.folia.ticks
 import dev.slne.surf.jumppad.pad.JumpPadType
-import dev.slne.surf.jumppad.particles.animationService
+import dev.slne.surf.jumppad.particles.AnimationService
 import dev.slne.surf.jumppad.plugin
 import kotlinx.coroutines.*
 import org.bukkit.GameMode
@@ -21,7 +21,9 @@ val jumpPadBoostService = JumpPadBoostService
 object JumpPadBoostService {
     private val activeBoosts = ConcurrentHashMap<UUID, Job>()
 
-    fun isBoosting(player: Player): Boolean { return activeBoosts[player.uniqueId]?.isActive == true }
+    fun isBoosting(player: Player): Boolean {
+        return activeBoosts[player.uniqueId]?.isActive == true
+    }
 
     fun startBoost(
         player: Player,
@@ -94,13 +96,12 @@ object JumpPadBoostService {
                 .add(0.0, nextVPos, 0.0)
 
             val diff = desiredNext.toVector().subtract(player.location.toVector())
-            val vel = diff.multiply(0.25)
-            player.velocity = vel
 
-            player.velocity = vel
+            player.velocity = diff.multiply(0.25)
+
             player.fallDistance = 0f
 
-            animationService.playBoostAnimation(player, padType, tick)
+            AnimationService.playBoostAnimation(player, padType, tick)
 
             tick++
             delay(1.ticks)
@@ -127,8 +128,9 @@ object JumpPadBoostService {
             val h = dist * p
             val v = (sin(p * PI) * peak) + (p * yOff)
 
-            val headLoc = start.clone().add(dir.clone().multiply(h)).add(0.0, v + 1.8, 0.0)
-            val footLoc = start.clone().add(dir.clone().multiply(h)).add(0.0, v, 0.0)
+            val hVec = dir.clone().multiply(h)
+            val headLoc = start.clone().add(hVec).add(0.0, v + 1.8, 0.0)
+            val footLoc = start.clone().add(hVec).add(0.0, v, 0.0)
 
             if (headLoc.block.type.isSolid || footLoc.block.type.isSolid) return true
         }

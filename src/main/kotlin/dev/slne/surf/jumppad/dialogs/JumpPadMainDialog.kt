@@ -2,22 +2,22 @@
 
 package dev.slne.surf.jumppad.dialogs
 
+import dev.slne.surf.api.core.font.toSmallCaps
+import dev.slne.surf.api.core.messages.adventure.appendNewline
+import dev.slne.surf.api.paper.dialog.base
+import dev.slne.surf.api.paper.dialog.builder.actionButton
+import dev.slne.surf.api.paper.dialog.dialog
+import dev.slne.surf.api.paper.dialog.type
 import dev.slne.surf.jumppad.dialogs.create.DecideForTypeDialog
 import dev.slne.surf.jumppad.dialogs.view.JumpPadListDialog
 import dev.slne.surf.jumppad.pad.JumpPadType
-import dev.slne.surf.jumppad.pad.service.jumpPadService
-import dev.slne.surf.surfapi.bukkit.api.dialog.base
-import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
-import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
-import dev.slne.surf.surfapi.bukkit.api.dialog.type
-import dev.slne.surf.surfapi.core.api.font.toSmallCaps
-import dev.slne.surf.surfapi.core.api.messages.adventure.appendNewline
+import dev.slne.surf.jumppad.pad.service.JumpPadService
 import io.papermc.paper.registry.data.dialog.ActionButton
 
 object JumpPadMainDialog {
     fun showDialog() = dialog {
         base {
-            val pads = jumpPadService.getPads()
+            val pads = JumpPadService.getPads()
             title {
                 primary("JUMPPAD ".toSmallCaps())
                 success("VERWALTUNG".toSmallCaps())

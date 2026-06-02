@@ -1,82 +1,170 @@
 package dev.slne.surf.jumppad.storage
 
-import com.google.auto.service.AutoService
+import dev.slne.surf.api.core.util.logger
+import dev.slne.surf.api.core.util.mutableObjectListOf
+import dev.slne.surf.api.paper.extensions.server
 import dev.slne.surf.jumppad.pad.JumpPad
 import dev.slne.surf.jumppad.pad.JumpPadType
-import dev.slne.surf.jumppad.pad.service.jumpPadService
+import dev.slne.surf.jumppad.pad.service.JumpPadService
 import dev.slne.surf.jumppad.plugin
-import dev.slne.surf.surfapi.core.api.util.logger
-import org.bukkit.configuration.file.YamlConfiguration
-import java.nio.file.Files
-import java.nio.file.Path
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import net.kyori.adventure.key.InvalidKeyException
+import net.kyori.adventure.key.Key
+import net.kyori.adventure.nbt.BinaryTagIO
+import net.kyori.adventure.nbt.CompoundBinaryTag
+import org.bukkit.Location
 import java.util.*
+import kotlin.io.path.createParentDirectories
+import kotlin.io.path.div
+import kotlin.io.path.exists
 
-@AutoService(StorageService::class)
-class StorageService {
-    private val jumpPadFolder: Path get() = plugin.dataPath.resolve("pads")
+object StorageService {
+    private val log = logger()
+    private val jumpPadsPath = plugin.dataPath / "jumppads.dat"
 
-    fun init() {
-        if (!Files.exists(jumpPadFolder)) {
-            Files.createDirectories(jumpPadFolder)
+    suspend fun loadPadsFromFile() {
+        if (!jumpPadsPath.exists()) {
+            migrateLegacyStorage()
+            return
         }
-    }
 
-    fun loadPads() {
-        val files = Files.list(jumpPadFolder).filter { it.toString().endsWith(".yml") }.toList()
-        var loadedCount = 0
+        val compoundTag = withContext(Dispatchers.IO) { BinaryTagIO.reader().read(jumpPadsPath) }
+        val pads = mutableObjectListOf<JumpPad>()
 
-        files.forEach { path ->
-            val config = YamlConfiguration.loadConfiguration(path.toFile())
+        for ((key, tag) in compoundTag) {
+            if (tag !is CompoundBinaryTag) {
+                log.atWarning().log("Invalid tag for key: $key. Skipping this pad.")
+                continue
+            }
 
-            runCatching {
-                val uuid = UUID.fromString(config.getString("pad.data.uuid"))
-                val origin = config.getLocation("pad.data.origin") ?: error("Origin missing in ${path.fileName}")
+            val uuid = try {
+                UUID.fromString(key)
+            } catch (e: IllegalArgumentException) {
+                log.atWarning()
+                    .withCause(e)
+                    .log("Invalid UUID: $key. Skipping this pad.")
+                continue
+            }
 
-                val typeString = config.getString("pad.data.type") ?: error("Type missing in ${path.fileName}")
-                val type = JumpPadType.valueOf(typeString.uppercase())
-
-                val distance = config.getInt("pad.data.distance")
-                val targetLocation = config.getLocation("pad.data.targetLocation")
-
-                val width = config.getInt("pad.data.width")
-                val length = config.getInt("pad.data.length")
-
-                val pad = JumpPad(uuid, origin, type, distance, targetLocation, width, length)
-                jumpPadService.registerPad(pad)
-                loadedCount++
-            }.onFailure {
-                logger().atWarning().log("Failed to load JumpPad from file ${path.fileName}: ${it.message}")
+            val pad = loadPad(uuid, tag)
+            if (pad != null) {
+                pads.add(pad)
             }
         }
-        logger().atInfo().log("Successfully loaded $loadedCount JumpPads from ${files.size} files!")
+
+        for (pad in pads) {
+            val registered = JumpPadService.registerPad(pad)
+            if (!registered) {
+                log.atWarning().log("Pad with UUID ${pad.uuid} already exists. Skipping this pad.")
+            }
+        }
     }
 
-    fun savePads() {
-        Files.list(jumpPadFolder).filter { it.toString().endsWith(".yml") }.forEach(Files::delete)
+    @Suppress("DEPRECATION")
+    private suspend fun migrateLegacyStorage() {
+        storageServiceOld.init()
+        if (!storageServiceOld.hasLegacyData()) return
 
-        val pads = jumpPadService.getPads()
-
-        pads.forEach { pad ->
-            val file = jumpPadFolder.resolve("${pad.uuid}.yml").toFile()
-            val config = YamlConfiguration()
-
-            config["pad.data.uuid"] = pad.uuid.toString()
-            config["pad.data.origin"] = pad.origin
-            config["pad.data.type"] = pad.type.name
-            config["pad.data.distance"] = pad.distance
-            pad.targetLocation?.let { config["pad.data.targetLocation"] = it }
-            config["pad.data.width"] = pad.width
-            config["pad.data.length"] = pad.length
-
-            config.save(file)
+        val migratedPads = storageServiceOld.loadPads()
+        if (migratedPads == 0) {
+            log.atWarning().log("Legacy pad files were found, but no pads could be migrated.")
+            return
         }
 
-        logger().atInfo().log("Successfully saved ${pads.size} JumpPads to files!")
+        savePads()
+        log.atInfo().log("Migrated $migratedPads legacy jump pads to ${jumpPadsPath.fileName}.")
     }
 
-    companion object {
-        val instance = StorageService()
+    suspend fun savePads() {
+        val pads = JumpPadService.getPads()
+
+        val compoundTag = CompoundBinaryTag.builder(pads.size)
+            .apply {
+                for (pad in pads) {
+                    put(pad.uuid.toString(), savePad(pad))
+                }
+            }
+            .build()
+
+        withContext(Dispatchers.IO) {
+            jumpPadsPath.createParentDirectories()
+            BinaryTagIO.writer().write(compoundTag, jumpPadsPath)
+        }
+    }
+
+    private fun savePad(pad: JumpPad): CompoundBinaryTag = CompoundBinaryTag.builder(6)
+        .put("origin", saveLocation(pad.origin))
+        .putString("type", pad.type.name)
+        .putInt("distance", pad.distance)
+        .put("targetLocation", pad.targetLocation?.let { saveLocation(it) } ?: CompoundBinaryTag.empty())
+        .putInt("width", pad.width)
+        .putInt("length", pad.length)
+        .build()
+
+    private fun saveLocation(location: Location) = CompoundBinaryTag.builder(6)
+        .putString("world_key", location.world.key().asString())
+        .putDouble("x", location.x)
+        .putDouble("y", location.y)
+        .putDouble("z", location.z)
+        .putFloat("yaw", location.yaw)
+        .putFloat("pitch", location.pitch)
+        .build()
+
+    private fun loadPad(uuid: UUID, tag: CompoundBinaryTag): JumpPad? {
+        val originTag = tag.getCompound("origin")
+        val typeString = tag.getString("type")
+        val distance = tag.getInt("distance")
+        val targetLocationTag = tag.getCompound("targetLocation")
+        val width = tag.getInt("width")
+        val length = tag.getInt("length")
+
+        val origin = loadLocation(originTag) ?: return null
+        val targetLocation = if (targetLocationTag.isEmpty) null else loadLocation(targetLocationTag) ?: return null
+        val type = try {
+            JumpPadType.valueOf(typeString.uppercase())
+        } catch (e: IllegalArgumentException) {
+            log.atWarning()
+                .withCause(e)
+                .log("Invalid type: $typeString. Skipping this pad.")
+            return null
+        }
+
+        return JumpPad(
+            uuid = uuid,
+            origin = origin,
+            type = type,
+            distance = distance,
+            targetLocation = targetLocation,
+            width = width,
+            length = length
+        )
+    }
+
+    private fun loadLocation(tag: CompoundBinaryTag): Location? {
+        val worldKeyString = tag.getString("world_key")
+        val x = tag.getDouble("x")
+        val y = tag.getDouble("y")
+        val z = tag.getDouble("z")
+        val yaw = tag.getFloat("yaw")
+        val pitch = tag.getFloat("pitch")
+
+        val key = try {
+            Key.key(worldKeyString)
+        } catch (e: InvalidKeyException) {
+            log.atWarning()
+                .withCause(e)
+                .log("Invalid key: $worldKeyString (world_key: ${worldKeyString}). Skipping this pad.")
+            return null
+        }
+
+        val world = server.getWorld(key)
+        if (world == null) {
+            log.atWarning()
+                .log("Could not find world with key: $worldKeyString (world_key: ${worldKeyString}). Skipping this pad.")
+            return null
+        }
+
+        return Location(world, x, y, z, yaw, pitch)
     }
 }
-
-val storageService get() = StorageService.instance

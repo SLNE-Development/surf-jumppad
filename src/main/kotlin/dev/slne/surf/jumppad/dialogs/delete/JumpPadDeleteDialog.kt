@@ -2,17 +2,17 @@
 
 package dev.slne.surf.jumppad.dialogs.delete
 
+import dev.slne.surf.api.core.font.toSmallCaps
+import dev.slne.surf.api.core.messages.adventure.appendNewline
+import dev.slne.surf.api.paper.dialog.base
+import dev.slne.surf.api.paper.dialog.builder.actionButton
+import dev.slne.surf.api.paper.dialog.dialog
+import dev.slne.surf.api.paper.dialog.type
 import dev.slne.surf.jumppad.dialogs.view.JumpPadInfoDialog
 import dev.slne.surf.jumppad.dialogs.view.JumpPadListDialog
 import dev.slne.surf.jumppad.pad.JumpPad
 import dev.slne.surf.jumppad.pad.JumpPadType
-import dev.slne.surf.jumppad.pad.service.jumpPadService
-import dev.slne.surf.surfapi.bukkit.api.dialog.base
-import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
-import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
-import dev.slne.surf.surfapi.bukkit.api.dialog.type
-import dev.slne.surf.surfapi.core.api.font.toSmallCaps
-import dev.slne.surf.surfapi.core.api.messages.adventure.appendNewline
+import dev.slne.surf.jumppad.pad.service.JumpPadService
 import io.papermc.paper.dialog.Dialog
 import net.kyori.adventure.text.format.TextDecoration
 
@@ -97,7 +97,7 @@ object JumpPadDeleteDialog {
         tooltip { info("Klicke hier, um das jumpPad zu löschen.") }
         action {
             playerCallback {
-                jumpPadService.deletePad(pad)
+                JumpPadService.deletePad(pad)
                 it.showDialog(JumpPadListDialog.showDialog())
             }
         }

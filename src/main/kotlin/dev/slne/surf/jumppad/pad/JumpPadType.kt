@@ -1,26 +1,26 @@
 package dev.slne.surf.jumppad.pad
 
-import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
+import dev.slne.surf.api.core.messages.adventure.buildText
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
 import org.bukkit.Particle
 import org.bukkit.Sound
 import org.bukkit.entity.Player
-import org.bukkit.util.Vector
+import org.spongepowered.math.vector.Vector3d
 
 enum class JumpPadType(
     val displayComponent: Component,
     val particleEffect: Particle,
     val particleBoostEffect: Particle,
     val sound: Sound,
-    val staticDirection: Vector? = null
+    val staticDirection: Vector3d? = null
 ) {
     HORIZONTAL_NORTH(
         buildText { text("Norden", TextColor.color(52, 152, 219)) },
         Particle.EXPLOSION,
         Particle.CLOUD,
         Sound.ENTITY_WIND_CHARGE_WIND_BURST,
-        Vector(0, 0, -1)
+        Vector3d(0.0, 0.0, -1.0)
     ),
 
     HORIZONTAL_EAST(
@@ -28,7 +28,7 @@ enum class JumpPadType(
         Particle.EXPLOSION,
         Particle.CLOUD,
         Sound.ENTITY_WIND_CHARGE_WIND_BURST,
-        Vector(1, 0, 0)
+        Vector3d(1.0, 0.0, 0.0)
     ),
 
     HORIZONTAL_SOUTH(
@@ -36,7 +36,7 @@ enum class JumpPadType(
         Particle.EXPLOSION,
         Particle.CLOUD,
         Sound.ENTITY_WIND_CHARGE_WIND_BURST,
-        Vector(0, 0, 1)
+        Vector3d(0.0, 0.0, 1.0)
     ),
 
     HORIZONTAL_WEST(
@@ -44,7 +44,7 @@ enum class JumpPadType(
         Particle.EXPLOSION,
         Particle.CLOUD,
         Sound.ENTITY_WIND_CHARGE_WIND_BURST,
-        Vector(-1, 0, 0)
+        Vector3d(-1.0, 0.0, 0.0)
     ),
 
     VERTICAL(
@@ -52,7 +52,7 @@ enum class JumpPadType(
         Particle.EXPLOSION,
         Particle.CLOUD,
         Sound.ENTITY_WIND_CHARGE_WIND_BURST,
-        Vector(0, 1, 0)
+        Vector3d(0.0, 1.0, 0.0)
     ),
 
     STATIC(
@@ -67,12 +67,14 @@ enum class JumpPadType(
         Particle.EXPLOSION,
         Particle.CLOUD,
         Sound.ENTITY_WIND_CHARGE_WIND_BURST
-    );
-
-    fun getDirection(player: Player): Vector {
-        return staticDirection?.clone() ?: when (this) {
-            PLAYER_DIRECTION -> player.location.direction.clone().setY(0).normalize()
-            else -> Vector(0, 0, 0)
+    ) {
+        override fun getDirection(player: Player): Vector3d {
+            val playerDirection = player.location.direction
+            return Vector3d(playerDirection.x, 0.0, playerDirection.z).normalize()
         }
+    };
+
+    open fun getDirection(player: Player): Vector3d {
+        return staticDirection ?: Vector3d.ZERO
     }
 }

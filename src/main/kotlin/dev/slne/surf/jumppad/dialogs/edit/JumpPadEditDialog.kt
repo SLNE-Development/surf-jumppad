@@ -2,17 +2,17 @@
 
 package dev.slne.surf.jumppad.dialogs.edit
 
+import dev.slne.surf.api.core.font.toSmallCaps
+import dev.slne.surf.api.core.messages.adventure.appendNewline
+import dev.slne.surf.api.paper.dialog.base
+import dev.slne.surf.api.paper.dialog.builder.actionButton
+import dev.slne.surf.api.paper.dialog.dialog
+import dev.slne.surf.api.paper.dialog.type
 import dev.slne.surf.jumppad.dialogs.edit.result.JumpPadEditFailResultDialog
 import dev.slne.surf.jumppad.dialogs.view.JumpPadInfoDialog
 import dev.slne.surf.jumppad.pad.JumpPad
 import dev.slne.surf.jumppad.pad.JumpPadType
-import dev.slne.surf.jumppad.pad.service.jumpPadService
-import dev.slne.surf.surfapi.bukkit.api.dialog.base
-import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
-import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
-import dev.slne.surf.surfapi.bukkit.api.dialog.type
-import dev.slne.surf.surfapi.core.api.font.toSmallCaps
-import dev.slne.surf.surfapi.core.api.messages.adventure.appendNewline
+import dev.slne.surf.jumppad.pad.service.JumpPadService
 import io.papermc.paper.registry.data.dialog.ActionButton
 import org.bukkit.Location
 import org.bukkit.World
@@ -142,7 +142,7 @@ object JumpPadEditDialog {
                     targetLocation = targetLoc
                 )
 
-                jumpPadService.updatePad(updatedPad)
+                JumpPadService.updatePad(updatedPad)
                 player.showDialog(JumpPadInfoDialog.showDialog(updatedPad))
             }
         }

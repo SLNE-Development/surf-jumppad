@@ -11,3 +11,7 @@ plugins {
 }
 
 rootProject.name = "surf-jumppad"
+
+include("surf-jumppad-core-client")
+include("surf-jumppad-paper")
+include("surf-jumppad-minestom")

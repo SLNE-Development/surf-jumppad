@@ -9,6 +9,9 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/surf-jumppad-core-client" />
+            <option value="$PROJECT_DIR$/surf-jumppad-minestom" />
+            <option value="$PROJECT_DIR$/surf-jumppad-paper" />
           </set>
         </option>
       </GradleProjectSettings>

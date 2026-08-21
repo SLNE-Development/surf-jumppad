@@ -4,8 +4,11 @@ plugins {
 
 surfPaperPluginApi {
     mainClass("dev.slne.surf.jumppad.BukkitMain")
-
     authors.add("Jo_field")
+}
+
+paper {
+    name = "surf-jumppad" // Avoid data loss after module split
 }
 
 dependencies {

@@ -71,23 +71,22 @@ object JumpPadBoostService {
 
         val boostTarget = PlayerBoostTarget(player, world)
 
-        var job: Job? = null
-        job = plugin.launch(plugin.entityDispatcher(player), start = CoroutineStart.UNDISPATCHED) {
-            try {
-                runBoost(
-                    target = boostTarget,
-                    path = path,
-                    targetPosition = target,
-                    initialPeak = peakHeight,
-                    padType = padType
-                )
-            } finally {
-                job?.let { activeBoosts.remove(playerUuid, it) }
-            }
+        val job = plugin.launch(
+            plugin.entityDispatcher(player),
+            start = CoroutineStart.UNDISPATCHED
+        ) {
+            runBoost(
+                target = boostTarget,
+                path = path,
+                targetPosition = target,
+                initialPeak = peakHeight,
+                padType = padType
+            )
         }
 
         activeBoosts[playerUuid] = job
-        job.start()
+
+        job.invokeOnCompletion { activeBoosts.remove(playerUuid, job) }
     }
 
     /**
@@ -96,7 +95,10 @@ object JumpPadBoostService {
      * @param player the player whose boost should be stopped
      */
     fun stopBoost(player: Player) {
-        activeBoosts.remove(player.uniqueId)?.cancel("Boost stopped")
+        val playerUuid = player.uniqueId
+
+        if (!activeBoosts.containsKey(playerUuid)) return
+        activeBoosts.remove(playerUuid)?.cancel("Boost stopped")
     }
 
     private class PlayerBoostTarget(
@@ -122,6 +124,6 @@ object JumpPadBoostService {
             AnimationService.playBoostAnimation(player, type, tick)
         }
 
-        override fun isSolidBlockAt(x: Int, y: Int, z: Int) = world.getBlockAt(x, y, z).type.isSolid
+        override fun isSolidBlockAt(x: Int, y: Int, z: Int) = world.getType(x, y, z).isSolid
     }
 }

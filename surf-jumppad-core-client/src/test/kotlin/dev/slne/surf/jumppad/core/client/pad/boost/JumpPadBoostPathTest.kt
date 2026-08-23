@@ -109,6 +109,20 @@ class JumpPadBoostPathTest {
     }
 
     @Test
+    fun `notices a single solid block on the way`() {
+        val path = assertNotNull(
+            JumpPadBoostPath.between(position(0.0, 64.0, 0.0), position(0.0, 64.0, 20.0))
+        )
+
+        // Half way along the path the arc stands exactly `peak` blocks above its start, so an
+        // 8 block arc puts a foot sample on (0, 72, 10) and nowhere else. Only that one block is
+        // solid, which keeps the collision scan from being allowed to skip any distinct block.
+        val peak = path.resolvePeak(8.0) { x, y, z -> x == 0 && y == 72 && z == 10 }
+
+        assertTrue(peak < 8.0, "a solid block on the path did not lower the arc")
+    }
+
+    @Test
     fun `stops lowering the arc height at the minimum`() {
         val path = assertNotNull(
             JumpPadBoostPath.between(position(0.0, 64.0, 0.0), position(0.0, 64.0, 20.0))

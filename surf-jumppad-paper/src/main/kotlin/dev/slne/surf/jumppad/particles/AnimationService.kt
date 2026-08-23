@@ -3,6 +3,8 @@ package dev.slne.surf.jumppad.particles
 import dev.slne.surf.api.paper.region.TickThreadGuard
 import dev.slne.surf.jumppad.core.client.pad.JumpPadType
 import dev.slne.surf.jumppad.core.client.pad.effect.JumpPadAnimation
+import net.kyori.adventure.key.Key
+import org.bukkit.Particle
 import org.bukkit.Registry
 import org.bukkit.entity.Player
 
@@ -15,6 +17,9 @@ import org.bukkit.entity.Player
 @Suppress("UnstableApiUsage")
 object AnimationService {
 
+    private val startParticles: Array<Particle> = resolveParticles { it.particleEffect }
+    private val boostParticles: Array<Particle> = resolveParticles { it.particleBoostEffect }
+
     /**
      * Plays the initial particle animation for a jump pad.
      *
@@ -26,11 +31,12 @@ object AnimationService {
      */
     fun playStartAnimation(player: Player, type: JumpPadType) {
         TickThreadGuard.ensureTickThread(player, "Cannot play start animation on non-tick thread!")
-        val loc = player.location.add(0.0, JumpPadAnimation.START_Y_OFFSET, 0.0)
 
         player.world.spawnParticle(
-            Registry.PARTICLE_TYPE.getOrThrow(type.particleEffect),
-            loc,
+            startParticles[type.ordinal],
+            player.x,
+            player.y + JumpPadAnimation.START_Y_OFFSET,
+            player.z,
             JumpPadAnimation.START_PARTICLE_COUNT,
             JumpPadAnimation.START_PARTICLE_SPREAD,
             0.0,
@@ -53,16 +59,19 @@ object AnimationService {
     fun playBoostAnimation(player: Player, padType: JumpPadType, tick: Int) {
         TickThreadGuard.ensureTickThread(player, "Cannot play boost animation on non-tick thread!")
 
-        val base = player.location
-
         player.world.spawnParticle(
-            Registry.PARTICLE_TYPE.getOrThrow(padType.particleBoostEffect),
-            base.x + JumpPadAnimation.boostOffsetX(tick),
-            base.y + JumpPadAnimation.BOOST_Y_OFFSET,
-            base.z + JumpPadAnimation.boostOffsetZ(tick),
+            boostParticles[padType.ordinal],
+            player.x + JumpPadAnimation.boostOffsetX(tick),
+            player.y + JumpPadAnimation.BOOST_Y_OFFSET,
+            player.z + JumpPadAnimation.boostOffsetZ(tick),
             1,
             0.0, 0.0, 0.0,
             JumpPadAnimation.BOOST_PARTICLE_SPEED
         )
+    }
+
+    private fun resolveParticles(key: (JumpPadType) -> Key): Array<Particle> {
+        val types = JumpPadType.entries
+        return Array(types.size) { Registry.PARTICLE_TYPE.getOrThrow(key(types[it])) }
     }
 }

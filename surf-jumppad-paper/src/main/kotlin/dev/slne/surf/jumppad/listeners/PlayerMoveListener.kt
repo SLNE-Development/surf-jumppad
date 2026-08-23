@@ -7,7 +7,6 @@ import dev.slne.surf.jumppad.core.client.pad.effect.playJumpPadSound
 import dev.slne.surf.jumppad.core.client.pad.service.JumpPadCooldownService
 import dev.slne.surf.jumppad.core.client.pad.service.JumpPadService
 import dev.slne.surf.jumppad.pad.service.JumpPadBoostService
-import dev.slne.surf.jumppad.pad.toJumpPadPosition
 import dev.slne.surf.jumppad.particles.AnimationService
 import org.bukkit.GameMode
 import org.bukkit.entity.Player
@@ -40,8 +39,10 @@ object PlayerMoveListener : Listener {
         if (player.gameMode == GameMode.SPECTATOR) return
         if (JumpPadBoostService.isBoosting(player)) return
 
-        val to = event.to.toJumpPadPosition() ?: return
-        val pad = JumpPadService.getPadAt(to) ?: return
+        val to = event.to
+        val world = to.world ?: return
+
+        val pad = JumpPadService.getPadAt(world.key(), to.blockX, to.blockY, to.blockZ) ?: return
         if (!JumpPadCooldownService.tryUse(player.uniqueId)) return
 
         handleJumpPad(player, pad)

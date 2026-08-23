@@ -5,6 +5,7 @@ import dev.slne.surf.api.paper.event.register
 import dev.slne.surf.jumppad.commands.jumpPadCommand
 import dev.slne.surf.jumppad.listeners.PlayerInteractListener
 import dev.slne.surf.jumppad.listeners.PlayerMoveListener
+import dev.slne.surf.jumppad.listeners.PlayerQuitListener
 import dev.slne.surf.jumppad.listeners.PlayerTeleportListener
 import dev.slne.surf.jumppad.storage.StorageService
 import org.bukkit.plugin.java.JavaPlugin
@@ -17,6 +18,7 @@ class BukkitMain : SuspendingJavaPlugin() {
         PlayerMoveListener.register()
         PlayerInteractListener.register()
         PlayerTeleportListener.register()
+        PlayerQuitListener.register()
 
         StorageService.loadPadsFromFile()
     }

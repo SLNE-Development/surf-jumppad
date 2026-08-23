@@ -72,22 +72,19 @@ object JumpPadBoostService {
 
         val boostTarget = PlayerBoostTarget(player, instance)
 
-        var job: Job? = null
-        job = minestomScope.launch(MinestomDispatchers.Main, CoroutineStart.LAZY) {
-            try {
-                runBoost(
-                    target = boostTarget,
-                    path = path,
-                    targetPosition = target,
-                    initialPeak = peakHeight,
-                    padType = padType
-                )
-            } finally {
-                job?.let { activeBoosts.remove(playerUuid, it) }
-            }
+        val job = minestomScope.launch(MinestomDispatchers.Main, CoroutineStart.LAZY) {
+            runBoost(
+                target = boostTarget,
+                path = path,
+                targetPosition = target,
+                initialPeak = peakHeight,
+                padType = padType
+            )
         }
 
         activeBoosts[playerUuid] = job
+
+        job.invokeOnCompletion { activeBoosts.remove(playerUuid, job) }
         job.start()
     }
 
@@ -97,7 +94,10 @@ object JumpPadBoostService {
      * @param player the player whose boost should be stopped
      */
     fun stopBoost(player: Player) {
-        activeBoosts.remove(player.uuid)?.cancel("Boost stopped")
+        val playerUuid = player.uuid
+
+        if (!activeBoosts.containsKey(playerUuid)) return
+        activeBoosts.remove(playerUuid)?.cancel("Boost stopped")
     }
 
     private class PlayerBoostTarget(

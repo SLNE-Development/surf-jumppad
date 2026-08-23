@@ -4,14 +4,9 @@ import dev.slne.minestom.lobby.api.extension.getOrThrow
 import dev.slne.minestom.lobby.api.extension.particleRegistry
 import dev.slne.surf.jumppad.core.client.pad.JumpPadType
 import dev.slne.surf.jumppad.core.client.pad.effect.JumpPadAnimation
-import net.kyori.adventure.key.Key
-import net.minestom.server.MinecraftServer
 import net.minestom.server.entity.Player
 import net.minestom.server.network.packet.server.play.ParticlePacket
 import net.minestom.server.particle.Particle
-import net.minestom.server.registry.BuiltinRegistries
-import net.minestom.server.registry.Registries
-import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Handles particle animations for jump pads.
@@ -20,6 +15,10 @@ import java.util.concurrent.ConcurrentHashMap
  * around players when they interact with a jump pad.
  */
 object AnimationService {
+
+    private val particles: Array<Particle> = JumpPadType.entries.let { types ->
+        Array(types.size) { particleRegistry.getOrThrow(types[it].particleEffect) }
+    }
 
     /**
      * Plays the initial particle animation for a jump pad.
@@ -35,7 +34,7 @@ object AnimationService {
 
         player.sendPacketToViewersAndSelf(
             ParticlePacket(
-                particleRegistry.getOrThrow(type.particleEffect),
+                particles[type.ordinal],
                 position.x(),
                 position.y() + JumpPadAnimation.START_Y_OFFSET,
                 position.z(),
@@ -64,7 +63,7 @@ object AnimationService {
 
         player.sendPacketToViewersAndSelf(
             ParticlePacket(
-                particleRegistry.getOrThrow(padType.particleEffect),
+                particles[padType.ordinal],
                 position.x() + JumpPadAnimation.boostOffsetX(tick),
                 position.y() + JumpPadAnimation.BOOST_Y_OFFSET,
                 position.z() + JumpPadAnimation.boostOffsetZ(tick),

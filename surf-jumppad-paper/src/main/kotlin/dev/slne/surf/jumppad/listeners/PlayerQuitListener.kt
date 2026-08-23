@@ -3,12 +3,12 @@ package dev.slne.surf.jumppad.listeners
 import dev.slne.surf.jumppad.pad.service.JumpPadBoostService
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.bukkit.event.player.PlayerTeleportEvent
+import org.bukkit.event.player.PlayerQuitEvent
 
-object PlayerTeleportListener : Listener {
+object PlayerQuitListener : Listener {
 
     @EventHandler
-    fun onPlayerTeleport(event: PlayerTeleportEvent) {
+    fun onPlayerQuit(event: PlayerQuitEvent) {
         JumpPadBoostService.stopBoost(event.player)
     }
 }

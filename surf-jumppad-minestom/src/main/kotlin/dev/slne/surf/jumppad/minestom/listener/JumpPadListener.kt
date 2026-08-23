@@ -3,6 +3,7 @@ package dev.slne.surf.jumppad.minestom.listener
 import com.google.inject.Singleton
 import dev.slne.minestom.lobby.api.event.EventRegistrar
 import dev.slne.minestom.lobby.api.extension.addListener
+import dev.slne.minestom.lobby.api.instance.worldKey
 import dev.slne.minestom.lobby.api.player.requireLobbyPlayer
 import dev.slne.surf.jumppad.core.client.message.JumpPadMessages
 import dev.slne.surf.jumppad.core.client.pad.JumpPad
@@ -14,7 +15,6 @@ import dev.slne.surf.jumppad.core.client.pad.service.JumpPadService
 import dev.slne.surf.jumppad.core.client.permission.JumpPadPermissions
 import dev.slne.surf.jumppad.minestom.dialog.view.JumpPadInfoDialog
 import dev.slne.surf.jumppad.minestom.pad.service.JumpPadBoostService
-import dev.slne.surf.jumppad.minestom.pad.toJumpPadPosition
 import dev.slne.surf.jumppad.minestom.particles.AnimationService
 import net.minestom.server.ServerFlag
 import net.minestom.server.coordinate.Point
@@ -45,33 +45,38 @@ class JumpPadListener : EventRegistrar {
 
     private fun onPlayerMove(event: PlayerMoveEvent) {
         val player = event.player
-        if (!hasChangedBlock(player.position, event.newPosition)) return
+        val to = event.newPosition
+        if (!hasChangedBlock(player.position, to)) return
         if (player.gameMode == GameMode.SPECTATOR) return
         if (JumpPadBoostService.isBoosting(player)) return
 
-        val instance = player.instance ?: return
-        val to = event.newPosition.toJumpPadPosition(instance) ?: return
+        val worldKey = (player.instance ?: return).worldKey ?: return
 
-        val pad = JumpPadService.getPadAt(to) ?: return
+        val pad = JumpPadService.getPadAt(worldKey, to.blockX(), to.blockY(), to.blockZ()) ?: return
         if (!JumpPadCooldownService.tryUse(player.uuid)) return
 
         handleJumpPad(player, pad)
     }
 
     private fun onBlockInteract(event: PlayerBlockInteractEvent) {
+        val worldKey = event.instance.worldKey ?: return
+        val block = event.blockPosition
+
+        val pad = JumpPadService.getPadAt(worldKey, block.blockX(), block.blockY(), block.blockZ())
+            ?: JumpPadService.getPadAt(
+                worldKey,
+                block.blockX(),
+                block.blockY() + 1,
+                block.blockZ()
+            )
+            ?: return
+
         val player = event.player
         if (!player.requireLobbyPlayer()
                 .hasPermission(JumpPadPermissions.COMMAND_JUMP_PAD_GENERIC)
         ) {
             return
         }
-
-        val position = event.blockPosition.toJumpPadPosition(event.instance) ?: return
-
-        val padAtBlock = JumpPadService.getPadAt(position)
-        val padAbove = JumpPadService.getPadAt(position.add(0.0, 1.0, 0.0))
-
-        val pad = padAtBlock ?: padAbove ?: return
 
         player.sendMessage(JumpPadMessages.padAtBlock(JumpPadInfoDialog.showDialog(pad)))
 
@@ -81,7 +86,6 @@ class JumpPadListener : EventRegistrar {
     private fun onEntityTeleport(event: EntityTeleportEvent) {
         val player = event.entity as? Player ?: return
 
-        if (!JumpPadBoostService.isBoosting(player)) return
         JumpPadBoostService.stopBoost(player)
     }
 

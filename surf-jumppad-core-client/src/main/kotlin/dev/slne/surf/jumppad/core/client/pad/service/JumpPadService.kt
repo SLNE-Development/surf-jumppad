@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap
  */
 object JumpPadService {
     private val pads = ConcurrentHashMap<UUID, JumpPad>()
-    private val padsByBlock = ConcurrentHashMap<PadBlockKey, UUID>()
+    private val padsByBlock = ConcurrentHashMap<PadBlockKey, JumpPad>()
 
     /**
      * Registers a new jump pad and indexes all blocks covered by its trigger area.
@@ -24,11 +24,10 @@ object JumpPadService {
      */
     @Synchronized
     fun registerPad(pad: JumpPad): Boolean {
-        if (pads.containsKey(pad.uuid)) {
+        if (pads.putIfAbsent(pad.uuid, pad) != null) {
             return false
         }
 
-        pads[pad.uuid] = pad
         indexPad(pad)
         return true
     }
@@ -40,8 +39,10 @@ object JumpPadService {
      */
     @Synchronized
     fun deletePad(pad: JumpPad) {
-        val removed = pads.remove(pad.uuid) ?: return
-        unindexPad(removed)
+        val registered = pads[pad.uuid] ?: return
+
+        unindexPad(registered)
+        pads.remove(pad.uuid, registered)
     }
 
     /**
@@ -53,10 +54,15 @@ object JumpPadService {
      */
     @Synchronized
     fun updatePad(pad: JumpPad) {
-        pads[pad.uuid]?.let(::unindexPad)
+        val previous = pads.put(pad.uuid, pad)
 
-        pads[pad.uuid] = pad
         indexPad(pad)
+
+        if (previous == null || previous == pad) {
+            return
+        }
+
+        unindexPad(previous)
     }
 
     /**
@@ -80,10 +86,8 @@ object JumpPadService {
      * @param blockZ the z coordinate of the block
      * @return the jump pad at the given block, or `null` if no pad is indexed there
      */
-    fun getPadAt(worldKey: Key, blockX: Int, blockY: Int, blockZ: Int): JumpPad? {
-        val padId = padsByBlock[PadBlockKey(worldKey, blockX, blockY, blockZ)] ?: return null
-        return pads[padId]
-    }
+    fun getPadAt(worldKey: Key, blockX: Int, blockY: Int, blockZ: Int): JumpPad? =
+        padsByBlock[PadBlockKey(worldKey, blockX, blockY, blockZ)]
 
     /**
      * Returns a snapshot of all currently registered jump pads.
@@ -97,16 +101,16 @@ object JumpPadService {
      */
     @Synchronized
     fun clear() {
-        pads.clear()
         padsByBlock.clear()
+        pads.clear()
     }
 
     private fun indexPad(pad: JumpPad) {
-        forEachCoveredBlock(pad) { key -> padsByBlock[key] = pad.uuid }
+        forEachCoveredBlock(pad) { key -> padsByBlock[key] = pad }
     }
 
     private fun unindexPad(pad: JumpPad) {
-        forEachCoveredBlock(pad) { key -> padsByBlock.remove(key, pad.uuid) }
+        forEachCoveredBlock(pad) { key -> padsByBlock.remove(key, pad) }
     }
 
     private inline fun forEachCoveredBlock(pad: JumpPad, action: (PadBlockKey) -> Unit) {

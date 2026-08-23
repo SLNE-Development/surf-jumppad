@@ -65,7 +65,7 @@ class JumpPadBoostPath(
      * @param isSolid whether the block at the given block coordinates is solid
      * @return the resolved arc height
      */
-    fun resolvePeak(initialPeak: Double, isSolid: (Int, Int, Int) -> Boolean): Double {
+    fun resolvePeak(initialPeak: Double, isSolid: SolidBlockCheck): Double {
         val steps = (distance * 2).toInt().coerceAtLeast(MIN_COLLISION_STEPS)
 
         val blockX = IntArray(steps)
@@ -95,22 +95,44 @@ class JumpPadBoostPath(
         return peak
     }
 
-    private inline fun collides(
+    private fun collides(
         steps: Int,
         blockX: IntArray,
         blockZ: IntArray,
         arcHeights: DoubleArray,
         baseHeights: DoubleArray,
         peak: Double,
-        isSolid: (Int, Int, Int) -> Boolean
+        isSolid: SolidBlockCheck
     ): Boolean {
+        var lastFootX = Int.MIN_VALUE
+        var lastFootY = 0
+        var lastFootZ = 0
+        var lastHeadX = Int.MIN_VALUE
+        var lastHeadY = 0
+        var lastHeadZ = 0
+
         for (index in 0 until steps) {
-            val footY = baseHeights[index] + arcHeights[index] * peak
+            val footHeight = baseHeights[index] + arcHeights[index] * peak
             val x = blockX[index]
             val z = blockZ[index]
 
-            if (isSolid(x, floor(footY).toInt(), z)) return true
-            if (isSolid(x, floor(footY + PLAYER_COLLISION_HEIGHT).toInt(), z)) return true
+            val footY = floor(footHeight).toInt()
+            if (x != lastFootX || footY != lastFootY || z != lastFootZ) {
+                if (isSolid.isSolidAt(x, footY, z)) return true
+
+                lastFootX = x
+                lastFootY = footY
+                lastFootZ = z
+            }
+
+            val headY = floor(footHeight + PLAYER_COLLISION_HEIGHT).toInt()
+            if (x != lastHeadX || headY != lastHeadY || z != lastHeadZ) {
+                if (isSolid.isSolidAt(x, headY, z)) return true
+
+                lastHeadX = x
+                lastHeadY = headY
+                lastHeadZ = z
+            }
         }
 
         return false
@@ -166,4 +188,19 @@ class JumpPadBoostPath(
             )
         }
     }
+}
+
+/**
+ * Answers whether the block at a set of block coordinates blocks movement.
+ */
+fun interface SolidBlockCheck {
+    /**
+     * Returns whether the block at the given block coordinates blocks movement.
+     *
+     * @param x the x coordinate of the block
+     * @param y the y coordinate of the block
+     * @param z the z coordinate of the block
+     * @return `true` if the block is solid
+     */
+    fun isSolidAt(x: Int, y: Int, z: Int): Boolean
 }

@@ -1,19 +1,22 @@
 package dev.slne.surf.jumppad.minestom
 
-import com.google.auto.service.AutoService
-import dev.slne.minestom.lobby.api.plugin.MinestomPlugin
-import dev.slne.minestom.lobby.api.plugin.annotation.MinestomPluginMeta
-import dev.slne.surf.jumppad.minestom.command.JumpPadCommandRegistrar
+import dev.slne.surf.api.minestom.plugin.SurfMinestomPlugin
+import dev.slne.surf.jumppad.minestom.command.jumpPadCommand
 import dev.slne.surf.jumppad.minestom.listener.JumpPadListener
+import dev.slne.surf.jumppad.minestom.storage.StorageService
 
-@AutoService(MinestomPlugin::class)
-@MinestomPluginMeta(
-    "surf-jumppad-minestom",
-    dependsOn = ["surf-api-minestom"]
-)
-class SurfJumpPadMinestomPlugin : MinestomPlugin(SurfJumpPadMinestomEntrypoint::class.java) {
-    override fun configurePlugin() {
-        bindEventRegistrar<JumpPadListener>()
-        bindCommandRegistrar<JumpPadCommandRegistrar>()
+object SurfJumpPadMinestomPlugin : SurfMinestomPlugin() {
+    override suspend fun onLoad() {
+        StorageService.loadPads()
+    }
+
+    override suspend fun onEnable() {
+        jumpPadCommand()
+
+        JumpPadListener.register(eventNode)
+    }
+
+    override suspend fun onDisable() {
+        StorageService.savePads()
     }
 }

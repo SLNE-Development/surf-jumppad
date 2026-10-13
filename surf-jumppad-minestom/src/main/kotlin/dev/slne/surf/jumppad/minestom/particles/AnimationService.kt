@@ -1,7 +1,7 @@
 package dev.slne.surf.jumppad.minestom.particles
 
-import dev.slne.minestom.lobby.api.extension.getOrThrow
-import dev.slne.minestom.lobby.api.extension.particleRegistry
+import dev.slne.surf.api.minestom.extension.getOrThrow
+import dev.slne.surf.api.minestom.extension.particleRegistry
 import dev.slne.surf.jumppad.core.client.pad.JumpPadType
 import dev.slne.surf.jumppad.core.client.pad.effect.JumpPadAnimation
 import net.minestom.server.entity.Player

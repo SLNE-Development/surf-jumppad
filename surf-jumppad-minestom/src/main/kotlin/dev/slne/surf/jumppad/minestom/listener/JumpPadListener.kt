@@ -1,10 +1,8 @@
 package dev.slne.surf.jumppad.minestom.listener
 
-import com.google.inject.Singleton
-import dev.slne.minestom.lobby.api.event.EventRegistrar
-import dev.slne.minestom.lobby.api.extension.addListener
-import dev.slne.minestom.lobby.api.instance.worldKey
-import dev.slne.minestom.lobby.api.player.requireLobbyPlayer
+import dev.slne.surf.api.minestom.event.EventRegistrar
+import dev.slne.surf.api.minestom.extension.addListener
+import dev.slne.surf.api.minestom.permission.hasPermission
 import dev.slne.surf.jumppad.core.client.message.JumpPadMessages
 import dev.slne.surf.jumppad.core.client.pad.JumpPad
 import dev.slne.surf.jumppad.core.client.pad.JumpPadType
@@ -14,6 +12,7 @@ import dev.slne.surf.jumppad.core.client.pad.service.JumpPadCooldownService
 import dev.slne.surf.jumppad.core.client.pad.service.JumpPadService
 import dev.slne.surf.jumppad.core.client.permission.JumpPadPermissions
 import dev.slne.surf.jumppad.minestom.dialog.view.JumpPadInfoDialog
+import dev.slne.surf.jumppad.minestom.instance.worldKey
 import dev.slne.surf.jumppad.minestom.pad.service.JumpPadBoostService
 import dev.slne.surf.jumppad.minestom.particles.AnimationService
 import net.minestom.server.ServerFlag
@@ -33,8 +32,7 @@ import org.spongepowered.math.vector.Vector3d
  * Handles everything players do to jump pads: stepping onto them, touching them, and leaving them
  * behind.
  */
-@Singleton
-class JumpPadListener : EventRegistrar {
+object JumpPadListener : EventRegistrar {
 
     override fun register(node: EventNode<Event>) {
         node.addListener(::onPlayerMove)
@@ -72,9 +70,7 @@ class JumpPadListener : EventRegistrar {
             ?: return
 
         val player = event.player
-        if (!player.requireLobbyPlayer()
-                .hasPermission(JumpPadPermissions.COMMAND_JUMP_PAD_GENERIC)
-        ) {
+        if (!player.hasPermission(JumpPadPermissions.COMMAND_JUMP_PAD_GENERIC)) {
             return
         }
 

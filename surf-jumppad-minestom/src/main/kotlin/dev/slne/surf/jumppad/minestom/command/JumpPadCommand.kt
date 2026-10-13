@@ -1,8 +1,8 @@
 package dev.slne.surf.jumppad.minestom.command
 
-import dev.slne.minestom.lobby.api.command.commandapi.dsl.blockPositionArgument
-import dev.slne.minestom.lobby.api.command.commandapi.dsl.commandAPICommand
-import dev.slne.minestom.lobby.api.command.commandapi.dsl.playerExecutor
+import dev.slne.surf.api.minestom.command.dsl.blockPositionArgument
+import dev.slne.surf.api.minestom.command.dsl.commandAPICommand
+import dev.slne.surf.api.minestom.command.dsl.playerExecutor
 import dev.slne.surf.jumppad.core.client.message.JumpPadMessages
 import dev.slne.surf.jumppad.core.client.pad.service.JumpPadService
 import dev.slne.surf.jumppad.core.client.permission.JumpPadPermissions

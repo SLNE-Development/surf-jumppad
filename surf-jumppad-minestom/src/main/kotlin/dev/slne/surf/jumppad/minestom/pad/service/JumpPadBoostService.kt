@@ -1,7 +1,7 @@
 package dev.slne.surf.jumppad.minestom.pad.service
 
-import dev.slne.minestom.lobby.api.coroutine.MinestomDispatchers
-import dev.slne.minestom.lobby.api.coroutine.minestomScope
+import dev.slne.surf.api.minestom.coroutine.MinestomDispatchers
+import dev.slne.surf.api.minestom.coroutine.minestomScope
 import dev.slne.surf.jumppad.core.client.pad.JumpPadPosition
 import dev.slne.surf.jumppad.core.client.pad.JumpPadType
 import dev.slne.surf.jumppad.core.client.pad.boost.JumpPadBoostPath

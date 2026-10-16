@@ -1,8 +1,8 @@
 package dev.slne.surf.jumppad.minestom.pad
 
-import dev.slne.minestom.lobby.api.extension.InstanceManager
-import dev.slne.minestom.lobby.api.instance.worldKey
+import dev.slne.surf.api.minestom.extension.InstanceManager
 import dev.slne.surf.jumppad.core.client.pad.JumpPadPosition
+import dev.slne.surf.jumppad.minestom.instance.worldKey
 import net.kyori.adventure.key.Key
 import net.minestom.server.coordinate.Point
 import net.minestom.server.coordinate.Pos

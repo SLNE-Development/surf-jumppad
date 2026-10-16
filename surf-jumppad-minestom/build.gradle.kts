@@ -8,6 +8,11 @@ surfMinestomApi {
     withCoreMinestom()
 }
 
+minestomPluginFile {
+    main = "dev.slne.surf.jumppad.minestom.SurfJumpPadMinestomPlugin"
+    authors = listOf("Jo_field")
+}
+
 dependencies {
     api(projects.surfJumppadCoreClient)
 }
